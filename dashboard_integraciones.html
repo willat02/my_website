@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Matrix-SAP | Centro de Control de Tráfico</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f4ff',
+                            100: '#d9e2ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 dark:text-slate-100 flex flex-col">
+
+    <!-- Header Principal -->
+    <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent dark:from-brand-400 dark:to-indigo-400">
+                        Matrix ⇆ SAP Integración
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Análisis de Tráfico Semanal (Mayo)</p>
+                </div>
+            </div>
+
+            <!-- Botones de Acción Rápida -->
+            <div class="flex items-center space-x-3">
+                <!-- Selector Modo Oscuro -->
+                <button id="themeToggle" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition duration-200 text-slate-500 dark:text-slate-400">
+                    <!-- Icono Sol -->
+                    <svg id="sunIcon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                    </svg>
+                    <!-- Icono Luna -->
+                    <svg id="moonIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+                
+                <!-- Botón de Exportar Datos -->
+                <button onclick="exportarCSV()" class="flex items-center space-x-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-brand-500/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span class="hidden md:inline">Exportar Datos</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 overflow-y-auto">
+        
+        <!-- Alerta de Resumen Analítico de Negocio -->
+        <div class="bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-slate-950 dark:to-indigo-950/20 border border-brand-100 dark:border-brand-900/40 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-start space-x-3.5">
+                <span class="p-2.5 bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 rounded-xl mt-1 md:mt-0 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                </span>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Foco Operativo de Integraciones</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-3xl leading-relaxed">
+                        Análisis exclusivo sobre las 7 integraciones clave de la operación. El tráfico general aumentó un <strong class="text-brand-600 dark:text-brand-400">+13.56%</strong>, impulsado principalmente por la actividad de <strong>Gestión Materiales</strong> y <strong>Gestión Pacientes</strong>.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                    SLA Activo: 99.9%
+                </span>
+            </div>
+        </div>
+
+        <!-- Fila de Tarjetas KPI - Ahora optimizada para 5 columnas en pantallas de escritorio -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+            
+            <!-- KPI 1 (NUEVO): Sumatoria Total Quincenal -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Volumen Quincenal</span>
+                    <span class="p-2 bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiTotalQuincenal" class="text-3xl font-extrabold text-slate-900 dark:text-white">108,685</h3>
+                    <p class="text-xs text-slate-500 mt-1">Sumatoria total (S1 + S2)</p>
+                </div>
+            </div>
+
+            <!-- KPI 2: Volumen Semana 1 -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Volumen Semana 1</span>
+                    <span class="p-2 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiS1" class="text-3xl font-extrabold text-slate-900 dark:text-white">50,890</h3>
+                    <p class="text-xs text-slate-500 mt-1">Mensajes procesados</p>
+                </div>
+            </div>
+
+            <!-- KPI 3: Volumen Semana 2 -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Volumen Semana 2</span>
+                    <span class="p-2 bg-brand-500/10 text-brand-600 dark:bg-brand-500/20 dark:text-brand-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiS2" class="text-3xl font-extrabold text-slate-900 dark:text-white">57,795</h3>
+                    <p class="text-xs text-brand-600 dark:text-brand-400 font-medium mt-1 flex items-center">
+                        <span id="pctCrecimiento" class="mr-1">+13.57%</span> de crecimiento vs S1
+                    </p>
+                </div>
+            </div>
+
+            <!-- KPI 4: Diferencia Neta -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Diferencia Neta</span>
+                    <span class="p-2 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiDiff" class="text-3xl font-extrabold text-slate-900 dark:text-white">+6,905</h3>
+                    <p class="text-xs text-slate-500 mt-1">Transacciones adicionales</p>
+                </div>
+            </div>
+
+            <!-- KPI 5: Servicio Líder -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Servicio Líder</span>
+                    <span class="p-2 bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiTopServicio" class="text-xl font-bold text-slate-900 dark:text-white truncate">Gestión Materiales</h3>
+                    <p class="text-xs text-slate-500 mt-1">Mayor volumen total registrado</p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECCIÓN: Análisis de Tendencia Temporal Individual -->
+        <section class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-100 dark:border-slate-900 pb-5">
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-lg">Comportamiento Temporal Detallado</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Analiza el tráfico diario individual de cada integración a lo largo de las semanas 1 y 2 de mayo</p>
+                </div>
+                <!-- Selector Interactivo de Integración -->
+                <div class="flex items-center space-x-3">
+                    <label for="selectorIntegracion" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Seleccionar Integración:</label>
+                    <select id="selectorIntegracion" onchange="actualizarAnalisisTemporal()" class="px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-semibold text-slate-800 dark:text-slate-100 transition">
+                        <!-- Se poblará dinámicamente con JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <!-- Gráfico de Tendencia -->
+                <div class="lg:col-span-9">
+                    <div class="relative w-full h-[320px]">
+                        <canvas id="temporalChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Métricas Dinámicas del Servicio Seleccionado -->
+                <div class="lg:col-span-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800/60 space-y-4">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Métricas del Servicio</h4>
+                    
+                    <div class="space-y-3.5 divide-y divide-slate-100 dark:divide-slate-800">
+                        <div class="pt-0">
+                            <p class="text-xs text-slate-500">Volumen Consolidado</p>
+                            <p id="tempTotalVol" class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">0</p>
+                        </div>
+                        <div class="pt-3">
+                            <p class="text-xs text-slate-500">Variación de Carga</p>
+                            <p id="tempVariacion" class="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">0%</p>
+                        </div>
+                        <div class="pt-3">
+                            <p class="text-xs text-slate-500">Día Hábil Pico (Carga Máxima)</p>
+                            <p id="tempDiaPico" class="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">Miércoles (Semana 2)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seccion de Visualizaciones Gráficas -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Gráfico 1: Comparativa Demanda Semanal -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm lg:col-span-8 flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-base">Análisis de Volumen de Integración</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Comparativa por servicio: Semana 1 vs. Semana 2</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="ordenarGrafico('volumen')" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition">
+                                Ordenar por Tráfico
+                            </button>
+                            <button onclick="ordenarGrafico('nombre')" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition">
+                                Alfabético
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-[360px] mt-6">
+                        <canvas id="volumenChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico 2: Desviaciones / Crecimientos Críticos -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm lg:col-span-4 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base">Desviación Operativa Neta</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Variación absoluta de transacciones (S2 - S1)</p>
+                    
+                    <div class="relative w-full h-[260px] mt-6">
+                        <canvas id="variacionChart"></canvas>
+                    </div>
+                </div>
+                <div class="border-t border-slate-100 dark:border-slate-800 pt-4 mt-4 space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-500">Mayor Alza Absoluta:</span>
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400">G. Materiales (+2,700)</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-500">Mayor Crecimiento %:</span>
+                        <span class="font-bold text-indigo-600 dark:text-indigo-400">G. Admisiones (+14.02%)</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-500">Mayor Contracción:</span>
+                        <span class="font-bold text-rose-600 dark:text-rose-400">Prot. CXMenores (-25)</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Tabla de Datos Dinámica y Buscable -->
+        <section class="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base">Tabla Analítica de Integraciones</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Detalle de los flujos activos y parametrizados</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </span>
+                        <input type="text" id="tablaBusqueda" oninput="filtrarTabla()" placeholder="Buscar servicio..." class="pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent w-full sm:w-64 transition">
+                    </div>
+                    <select id="filtroTendencia" onchange="filtrarTabla()" class="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+                        <option value="todos">Todos los flujos</option>
+                        <option value="crecimiento">En Crecimiento (▲)</option>
+                        <option value="decrecimiento">En Reducción (▼)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="px-6 py-4">Servicio Oficial</th>
+                            <th class="px-6 py-4 text-right">Semana 1 (Vol)</th>
+                            <th class="px-6 py-4 text-right">Semana 2 (Vol)</th>
+                            <th class="px-6 py-4 text-right">Diferencia</th>
+                            <th class="px-6 py-4 text-right">Variación (%)</th>
+                            <th class="px-6 py-4 text-center">Estado Crítico</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCuerpo" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">
+                        <!-- Las filas se insertarán dinámicamente con JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Simulador de Capacidad y Planificación (Semana 3) -->
+        <section class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_40%)]"></div>
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        Proyección Inteligente
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Planificador Inteligente de Capacidad (Semana 3)</h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Ajusta el multiplicador estimado para evaluar la tolerancia del flujo de datos en servidores SAP ante contingencias, campañas o cierres operativos en la tercera semana de mayo.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-6 pt-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="h-3.5 w-3.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-xs text-slate-300">Infraestructura Matrix: OK</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="h-3.5 w-3.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-xs text-slate-300">Servidores SAP: OK</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 space-y-5">
+                    <h4 class="text-sm font-bold tracking-wide uppercase text-slate-300">Parámetros de Simulación</h4>
+                    
+                    <div class="space-y-2">
+                        <label class="text-xs text-slate-300 flex justify-between">
+                            <span>Demanda Proyectada de Tráfico:</span>
+                            <span id="multiplicadorValor" class="font-bold text-indigo-300">1.15x (+15%)</span>
+                        </label>
+                        <input type="range" id="simuladorEscala" min="0.5" max="2.0" step="0.05" value="1.15" oninput="simularDemanda()" class="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-indigo-400 focus:outline-none">
+                    </div>
+
+                    <div class="border-t border-white/10 pt-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-300">Tráfico Estimado Semana 3:</span>
+                            <span id="traficoProyectadoS3" class="text-xl font-black text-white">66,464</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-300">Estado de Seguridad:</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Canal Seguro (&lt;80k)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-4 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:flex sm:justify-between sm:items-center">
+            <p class="text-xs text-slate-500 dark:text-slate-400">© 2026 Integración Corporativa Matrix ⇆ SAP. Todos los derechos reservados.</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-2 sm:mt-0">Desarrollado para William.</p>
+        </div>
+    </footer>
+
+    <!-- JS de Lógica de Datos y Renderizado -->
+    <script>
+        // Set de datos oficial parametrizado según solicitud del usuario (7 integraciones asignadas)
+        const datosServicios = [
+            { nombre: "Gestión Materiales", s1: 18400, s2: 21100 },
+            { nombre: "Gestión Pacientes", s1: 12500, s2: 14200 },
+            { nombre: "Gestión Servicios", s1: 9800, s2: 10950 },
+            { nombre: "Gestión Admisiones", s1: 8200, s2: 9350 },
+            { nombre: "Gestión Mezclas", s1: 1450, s2: 1620 },
+            { nombre: "Movimientos Adicionales", s1: 410, s2: 380 },
+            { nombre: "Protocolos CXMenores", s1: 120, s2: 95 }
+        ];
+
+        // Mapeo detallado de tráfico por día hábil (Lun a Vie) de la Semana 1 y Semana 2 para el gráfico de línea
+        const tendenciaTemporalData = {
+            "Gestión Materiales": {
+                semana1: [2760, 4048, 4416, 4048, 3128], // Suma: 18400
+                semana2: [3165, 4642, 5064, 4642, 3587]  // Suma: 21100
+            },
+            "Gestión Pacientes": {
+                semana1: [1875, 2750, 3000, 2750, 2125], // Suma: 12500
+                semana2: [2130, 3124, 3408, 3124, 2414]  // Suma: 14200
+            },
+            "Gestión Servicios": {
+                semana1: [1470, 2156, 2352, 2156, 1666], // Suma: 9800
+                semana2: [1642, 2409, 2628, 2409, 1862]  // Suma: 10950
+            },
+            "Gestión Admisiones": {
+                semana1: [1230, 1804, 1968, 1804, 1394], // Suma: 8200
+                semana2: [1402, 2057, 2244, 2057, 1590]  // Suma: 9350
+            },
+            "Gestión Mezclas": {
+                semana1: [218, 319, 348, 319, 246],    // Suma: 1450
+                semana2: [243, 356, 389, 356, 276]     // Suma: 1620
+            },
+            "Movimientos Adicionales": {
+                semana1: [62, 90, 98, 90, 70],         // Suma: 410
+                semana2: [57, 84, 91, 84, 64]          // Suma: 380
+            },
+            "Protocolos CXMenores": {
+                semana1: [18, 26, 29, 26, 21],         // Suma: 120
+                semana2: [14, 21, 23, 21, 16]          // Suma: 95
+            }
+        };
+
+        const diasSemanaLabels = [
+            "Lunes S1", "Martes S1", "Miércoles S1", "Jueves S1", "Viernes S1",
+            "Lunes S2", "Martes S2", "Miércoles S2", "Jueves S2", "Viernes S2"
+        ];
+
+        let volumenChartObj = null;
+        let variacionChartObj = null;
+        let temporalChartObj = null;
+        let criterioOrden = 'volumen'; // 'volumen' o 'nombre'
+
+        // Inicialización en carga de DOM
+        window.addEventListener('DOMContentLoaded', () => {
+            inicializarModoOscuro();
+            calcularKPIs();
+            renderizarTabla();
+            poblarSelectorIntegracion();
+            renderizarGraficos();
+            actualizarAnalisisTemporal();
+            simularDemanda();
+        });
+
+        // Lógica del Modo Oscuro
+        function inicializarModoOscuro() {
+            const themeToggle = document.getElementById('themeToggle');
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+
+            themeToggle.addEventListener('click', () => {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.theme = 'light';
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.theme = 'dark';
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                }
+                actualizarEstilosGraficos();
+            });
+        }
+
+        // Calcular KPIs Generales de forma Dinámica (S1, S2, Dif, Top y la Sumatoria Total)
+        function calcularKPIs() {
+            let totalS1 = 0;
+            let totalS2 = 0;
+            let maxVol = 0;
+            let topServicio = "";
+
+            datosServicios.forEach(s => {
+                totalS1 += s.s1;
+                totalS2 += s.s2;
+                if (s.s2 > maxVol) {
+                    maxVol = s.s2;
+                    topServicio = s.nombre;
+                }
+            });
+
+            const diff = totalS2 - totalS1;
+            const sign = diff >= 0 ? "+" : "";
+            const porcentaje = ((diff / totalS1) * 100).toFixed(2);
+            const totalQuincenal = totalS1 + totalS2;
+
+            // Renderizado en DOM
+            document.getElementById('kpiTotalQuincenal').innerText = totalQuincenal.toLocaleString();
+            document.getElementById('kpiS1').innerText = totalS1.toLocaleString();
+            document.getElementById('kpiS2').innerHTML = `${totalS2.toLocaleString()} <span class="text-xs text-brand-600 dark:text-brand-400 block sm:inline font-semibold font-sans ml-1">(+${porcentaje}%)</span>`;
+            document.getElementById('kpiDiff').innerText = `${sign}${diff.toLocaleString()}`;
+            document.getElementById('kpiTopServicio').innerText = topServicio;
+            document.getElementById('pctCrecimiento').innerText = `+${porcentaje}%`;
+        }
+
+        // Poblar Selector de Integración Individual para el análisis temporal
+        function poblarSelectorIntegracion() {
+            const selector = document.getElementById('selectorIntegracion');
+            selector.innerHTML = "";
+            datosServicios.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.nombre;
+                opt.innerText = s.nombre;
+                selector.appendChild(opt);
+            });
+        }
+
+        // Renderizar Tabla con semáforo y formato estructurado
+        function renderizarTabla(datosFiltrados = datosServicios) {
+            const tbody = document.getElementById('tablaCuerpo');
+            tbody.innerHTML = '';
+
+            datosFiltrados.forEach(item => {
+                const diff = item.s2 - item.s1;
+                const varPct = ((diff / item.s1) * 100).toFixed(2);
+                const esCrecimiento = diff >= 0;
+
+                const colorClaseDiff = esCrecimiento ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-rose-600 dark:text-rose-400 font-semibold';
+                const colorClasePill = esCrecimiento ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400';
+                const indicadorSemicolor = esCrecimiento ? 'border-emerald-500' : 'border-rose-500';
+
+                // Alerta condicional para fluctuaciones mayores al 15%
+                let badgeEstable = '';
+                if (Math.abs(varPct) > 15) {
+                    badgeEstable = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-400">Variación Alta</span>`;
+                } else {
+                    badgeEstable = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-400">Normal</span>`;
+                }
+
+                const fila = `
+                    <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition">
+                        <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white border-l-4 ${indicadorSemicolor}">
+                            ${item.nombre}
+                        </td>
+                        <td class="px-6 py-4 text-right font-medium text-slate-500 dark:text-slate-400">
+                            ${item.s1.toLocaleString()}
+                        </td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-800 dark:text-slate-100">
+                            ${item.s2.toLocaleString()}
+                        </td>
+                        <td class="px-6 py-4 text-right ${colorClaseDiff}">
+                            ${esCrecimiento ? '+' : ''}${diff.toLocaleString()}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${colorClasePill}">
+                                ${varPct}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            ${badgeEstable}
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += fila;
+            });
+        }
+
+        // Lógica de Buscador
+        function filtrarTabla() {
+            const busqueda = document.getElementById('tablaBusqueda').value.toLowerCase();
+            const tendencia = document.getElementById('filtroTendencia').value;
+
+            const datosFiltrados = datosServicios.filter(item => {
+                const coincideBusqueda = item.nombre.toLowerCase().includes(busqueda);
+                const diff = item.s2 - item.s1;
+
+                if (tendencia === 'crecimiento') {
+                    return coincideBusqueda && diff > 0;
+                } else if (tendencia === 'decrecimiento') {
+                    return coincideBusqueda && diff < 0;
+                }
+                return coincideBusqueda;
+            });
+
+            renderizarTabla(datosFiltrados);
+        }
+
+        // Actualizar análisis temporal e individual del gráfico de líneas
+        function actualizarAnalisisTemporal() {
+            const esModoOscuro = document.documentElement.classList.contains('dark');
+            const colorTexto = esModoOscuro ? '#f8fafc' : '#334155';
+            const integracionSeleccionada = document.getElementById('selectorIntegracion').value;
+            
+            // Extraer tendencias temporales
+            const datosHist = tendenciaTemporalData[integracionSeleccionada];
+            const datasetCompleto = [...datosHist.semana1, ...datosHist.semana2];
+
+            // Encontrar métricas dinámicas para el panel lateral
+            const sumaTotal = datasetCompleto.reduce((a, b) => a + b, 0);
+            const sumS1 = datosHist.semana1.reduce((a,b)=>a+b, 0);
+            const sumS2 = datosHist.semana2.reduce((a,b)=>a+b, 0);
+            const varPct = (((sumS2 - sumS1) / sumS1) * 100).toFixed(2);
+            
+            // Día de máximo tráfico
+            const valMax = Math.max(...datasetCompleto);
+            const indexMax = datasetCompleto.indexOf(valMax);
+            const diaPicoNombre = diasSemanaLabels[indexMax];
+
+            // Actualizar textos en UI
+            document.getElementById('tempTotalVol').innerText = sumaTotal.toLocaleString();
+            
+            const badgeVar = document.getElementById('tempVariacion');
+            badgeVar.innerText = `${varPct >= 0 ? '+' : ''}${varPct}%`;
+            if (varPct >= 0) {
+                badgeVar.className = "text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5";
+            } else {
+                badgeVar.className = "text-base font-bold text-rose-600 dark:text-rose-400 mt-0.5";
+            }
+            
+            document.getElementById('tempDiaPico').innerText = `${diaPicoNombre} (${valMax.toLocaleString()} transacciones)`;
+
+            // Renderizar / Actualizar Gráfico Lineal de Tendencia
+            if (temporalChartObj) {
+                temporalChartObj.destroy();
+            }
+
+            const ctxTemporal = document.getElementById('temporalChart').getContext('2d');
+            
+            // Degradado de fondo para estética premium
+            const gradient = ctxTemporal.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.00)');
+
+            temporalChartObj = new Chart(ctxTemporal, {
+                type: 'line',
+                data: {
+                    labels: diasSemanaLabels,
+                    datasets: [{
+                        label: `Tráfico Diario - ${integracionSeleccionada}`,
+                        data: datasetCompleto,
+                        borderColor: '#3b82f6',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: esModoOscuro ? '#0f172a' : '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        tension: 0.35,
+                        fill: true,
+                        backgroundColor: gradient,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: colorTexto, font: { family: 'Plus Jakarta Sans', weight: '700' } }
+                        },
+                        tooltip: {
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Volumen: ${context.parsed.y.toLocaleString()} transacciones`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        },
+                        y: {
+                            grid: { color: esModoOscuro ? 'rgba(71, 85, 105, 0.15)' : 'rgba(203, 213, 225, 0.3)' },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generar Visualizaciones con Chart.js
+        function renderizarGraficos() {
+            const esModoOscuro = document.documentElement.classList.contains('dark');
+            const colorTexto = esModoOscuro ? '#f8fafc' : '#334155';
+
+            let datosPreparados = [...datosServicios];
+            if (criterioOrden === 'volumen') {
+                datosPreparados.sort((a, b) => b.s2 - a.s2);
+            } else {
+                datosPreparados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            }
+
+            const labels = datosPreparados.map(s => s.nombre);
+            const dataS1 = datosPreparados.map(s => s.s1);
+            const dataS2 = datosPreparados.map(s => s.s2);
+            const variaciones = datosPreparados.map(s => s.s2 - s.s1);
+
+            // Chart 1: Demanda Comparativa
+            const ctxVolumen = document.getElementById('volumenChart').getContext('2d');
+            volumenChartObj = new Chart(ctxVolumen, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Semana 1',
+                            data: dataS1,
+                            backgroundColor: esModoOscuro ? '#4f46e5' : '#818cf8',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Semana 2',
+                            data: dataS2,
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 6,
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: colorTexto, font: { family: 'Plus Jakarta Sans', weight: '600' } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: esModoOscuro ? 'rgba(71, 85, 105, 0.2)' : 'rgba(203, 213, 225, 0.4)' },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans' } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans', weight: '500' } }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Desviaciones Operativas
+            const ctxVariacion = document.getElementById('variacionChart').getContext('2d');
+            const bgColorsDev = variaciones.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)');
+
+            variacionChartObj = new Chart(ctxVariacion, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Desviación Neta',
+                        data: variaciones,
+                        backgroundColor: bgColorsDev,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans', size: 9 } }
+                        },
+                        y: {
+                            grid: { color: esModoOscuro ? 'rgba(71, 85, 105, 0.2)' : 'rgba(203, 213, 225, 0.4)' },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function ordenarGrafico(criterio) {
+            criterioOrden = criterio;
+            if (volumenChartObj) {
+                volumenChartObj.destroy();
+            }
+            if (variacionChartObj) {
+                variacionChartObj.destroy();
+            }
+            renderizarGraficos();
+        }
+
+        // Lógica de actualización de temas
+        function actualizarEstilosGraficos() {
+            if (volumenChartObj) {
+                volumenChartObj.destroy();
+            }
+            if (variacionChartObj) {
+                variacionChartObj.destroy();
+            }
+            renderizarGraficos();
+            actualizarAnalisisTemporal();
+        }
+
+        // Simulador de Carga
+        function simularDemanda() {
+            const multiplicador = parseFloat(document.getElementById('simuladorEscala').value);
+            document.getElementById('multiplicadorValor').innerText = `${multiplicador.toFixed(2)}x (${multiplicador >= 1 ? '+' : ''}${Math.round((multiplicador - 1) * 100)}%)`;
+
+            let traficoS2Total = datosServicios.reduce((acc, s) => acc + s.s2, 0);
+            let proyectadoTotal = Math.round(traficoS2Total * multiplicador);
+
+            document.getElementById('traficoProyectadoS3').innerText = proyectadoTotal.toLocaleString();
+        }
+
+        // Exportador CSV Estructurado
+        function exportarCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Servicio Oficial,Volumen Semana 1,Volumen Semana 2,Diferencia Absoluta,Variacion Porcentual\r\n";
+
+            datosServicios.forEach(item => {
+                const diff = item.s2 - item.s1;
+                const varPct = ((diff / item.s1) * 100).toFixed(2);
+                csvContent += `"${item.nombre}",${item.s1},${item.s2},${diff},${varPct}%\r\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Trafico_Integraciones_Matrix_SAP_Estandarizado.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
