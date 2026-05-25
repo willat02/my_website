@@ -1039,51 +1039,64 @@
             const esModoOscuro = document.documentElement.classList.contains('dark');
             const colorTexto = esModoOscuro ? '#f8fafc' : '#334155';
             const selectorIntegracion = document.getElementById('selectorIntegracion');
+
             if (!selectorIntegracion) return;
+
             const integracionSeleccionada = selectorIntegracion.value;
-            
             const tendenciaAnio = tendenciaTemporalDataMultidimensional[anioSeleccionado]?.[mesSeleccionado] || {};
-            const semanasDisponibles = Object.keys(tendenciaAnio); // ej. ["s1", "s2", "s3"]
+            const semanasDisponibles = Object.keys(tendenciaAnio);
 
-            // Obtenemos la tendencia diaria de la semana activa actualmente seleccionada (semanaCompara)
-            const datasetCompleto = tendenciaAnio[semanaCompara]?.[integracionSeleccionada] || [0,0,0,0,0];
+            const etiquetas = [];
+            const valores = [];
 
-            let sumS1 = 0;
-            let sumS2 = 0;
+            semanasDisponibles.forEach(semanaKey => {
+                const datasetSemana = tendenciaAnio[semanaKey]?.[integracionSeleccionada] || [0,0,0,0,0];
 
-            // Variación dinámica contra la semana inmediatamente anterior cargada
-            const idxBase = semanasDisponibles.indexOf(semanaCompara);
-            if (idxBase > 0) {
-                const semanaAntKey = semanasDisponibles[idxBase - 1];
-                const tendenciaAnterior = tendenciaAnio[semanaAntKey]?.[integracionSeleccionada] || [0,0,0,0,0];
-                sumS1 = tendenciaAnterior.reduce((a, b) => a + b, 0);
-            } else {
-                sumS1 = (tendenciaAnio["s1"]?.[integracionSeleccionada] || [0,0,0,0,0]).reduce((a, b) => a + b, 0);
+                diasSemanaLabels.forEach((dia, index) => {
+                    etiquetas.push(`${dia} ${semanaKey.toUpperCase()}`);
+                    valores.push(datasetSemana[index] !== undefined ? datasetSemana[index] : 0);
+                });
+            });
+
+            const volumenConsolidado = valores.reduce((a, b) => a + b, 0);
+
+            let volumenAnterior = 0;
+            if (semanasDisponibles.length > 1) {
+                const semanaAnterior = semanasDisponibles[semanasDisponibles.length - 2];
+                volumenAnterior = (tendenciaAnio[semanaAnterior]?.[integracionSeleccionada] || [0,0,0,0,0])
+                    .reduce((a, b) => a + b, 0);
             }
-            sumS2 = datasetCompleto.reduce((a, b) => a + b, 0);
 
-            const varPct = sumS1 > 0 ? (((sumS2 - sumS1) / sumS1) * 100).toFixed(2) : "0.00";
-            
-            // Día de máximo tráfico
-            const valMax = Math.max(...datasetCompleto);
-            const indexMax = datasetCompleto.indexOf(valMax);
-            const diaPicoNombre = diasSemanaLabels[indexMax] || "No detectado";
+            const semanaActual = semanasDisponibles[semanasDisponibles.length - 1];
+            const volumenActual = (tendenciaAnio[semanaActual]?.[integracionSeleccionada] || [0,0,0,0,0])
+                .reduce((a, b) => a + b, 0);
+
+            const varPct = volumenAnterior > 0
+                ? (((volumenActual - volumenAnterior) / volumenAnterior) * 100).toFixed(2)
+                : "0.00";
+
+            const valMax = Math.max(...valores);
+            const indexMax = valores.indexOf(valMax);
+            const diaPicoNombre = etiquetas[indexMax] || "No detectado";
 
             const tempTotalVol = document.getElementById('tempTotalVol');
-            if (tempTotalVol) tempTotalVol.innerText = sumS2.toLocaleString();
-            
+            if (tempTotalVol) tempTotalVol.innerText = volumenConsolidado.toLocaleString();
+
             const badgeVar = document.getElementById('tempVariacion');
             if (badgeVar) {
                 badgeVar.innerText = `${varPct >= 0 ? '+' : ''}${varPct}%`;
+
                 if (parseFloat(varPct) >= 0) {
                     badgeVar.className = "text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5";
                 } else {
                     badgeVar.className = "text-base font-bold text-rose-600 dark:text-rose-400 mt-0.5";
                 }
             }
-            
+
             const tempDiaPico = document.getElementById('tempDiaPico');
-            if (tempDiaPico) tempDiaPico.innerText = `${diaPicoNombre} (${valMax.toLocaleString()} trans.)`;
+            if (tempDiaPico) {
+                tempDiaPico.innerText = `${diaPicoNombre} (${valMax.toLocaleString()} trans.)`;
+            }
 
             if (temporalChartObj) {
                 temporalChartObj.destroy();
@@ -1091,26 +1104,27 @@
 
             const ctxTemporal = document.getElementById('temporalChart').getContext('2d');
             const gradient = ctxTemporal.createLinearGradient(0, 0, 0, 300);
+
             gradient.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
             gradient.addColorStop(1, 'rgba(59, 130, 246, 0.00)');
 
             temporalChartObj = new Chart(ctxTemporal, {
                 type: 'line',
                 data: {
-                    labels: diasSemanaLabels,
+                    labels: etiquetas,
                     datasets: [{
-                        label: `Flujo Diario - ${integracionSeleccionada} (${semanaCompara.toUpperCase()})`,
-                        data: datasetCompleto,
+                        label: `Volumen de Integraciones - ${integracionSeleccionada}`,
+                        data: valores,
                         borderColor: '#3b82f6',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.35,
                         borderWidth: 3,
                         pointBackgroundColor: '#2563eb',
                         pointBorderColor: esModoOscuro ? '#0f172a' : '#ffffff',
                         pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 8,
-                        tension: 0.35,
-                        fill: true,
-                        backgroundColor: gradient,
+                        pointRadius: 4,
+                        pointHoverRadius: 7
                     }]
                 },
                 options: {
@@ -1118,17 +1132,43 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { color: colorTexto, font: { family: 'Plus Jakarta Sans', weight: '700' } }
+                            labels: {
+                                color: colorTexto,
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    weight: '700'
+                                }
+                            }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { display: false },
-                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: colorTexto,
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    size: 10
+                                },
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
                         },
                         y: {
-                            grid: { color: esModoOscuro ? 'rgba(71, 85, 105, 0.15)' : 'rgba(203, 213, 225, 0.3)' },
-                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans' } }
+                            beginAtZero: true,
+                            grid: {
+                                color: esModoOscuro
+                                    ? 'rgba(71, 85, 105, 0.15)'
+                                    : 'rgba(203, 213, 225, 0.3)'
+                            },
+                            ticks: {
+                                color: colorTexto,
+                                font: {
+                                    family: 'Plus Jakarta Sans'
+                                }
+                            }
                         }
                     }
                 }
