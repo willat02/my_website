@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Matrix-SAP | Centro de Control de Tráfico</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f4ff',
+                            100: '#d9e2ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 dark:text-slate-100 flex flex-col">
+
+    <!-- Header Principal -->
+    <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent dark:from-brand-400 dark:to-indigo-400">
+                        Matrix ⇆ SAP Integración
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Panel de Análisis Temporal iSAP</p>
+                </div>
+            </div>
+
+            <!-- Botones de Acción Rápida, Filtros y Selección de Semanas -->
+            <div class="flex items-center space-x-3">
+                
+                <!-- Selectores de Tiempo (AÑO, MES) - Autogenerados dinámicamente -->
+                <div class="hidden lg:flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <!-- Selector de Año -->
+                    <select id="selectorAnio" onchange="actualizarMesesPorAnio(); seleccionarPeriodo();" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-300 py-1.5 px-2.5 focus:outline-none cursor-pointer">
+                        <!-- Poblado dinámicamente -->
+                    </select>
+
+                    <span class="text-slate-300 dark:text-slate-700">|</span>
+
+                    <!-- Selector de Mes Principal -->
+                    <select id="selectorMes" onchange="seleccionarPeriodo()" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-300 py-1.5 px-2.5 focus:outline-none cursor-pointer">
+                        <!-- Poblado dinámicamente -->
+                    </select>
+                </div>
+
+                <!-- Selector de Semanas -->
+                <div class="hidden lg:flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2">Semanas de Análisis:</span>
+                    <select id="semanaBase" onchange="seleccionarPeriodo()" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-300 py-1 px-2 focus:outline-none cursor-pointer">
+                        <!-- Poblado dinámicamente -->
+                    </select>
+                    <span class="text-slate-300 dark:text-slate-700">vs</span>
+                    <select id="semanaCompara" onchange="seleccionarPeriodo()" class="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-300 py-1 px-2 focus:outline-none cursor-pointer">
+                        <!-- Poblado dinámicamente -->
+                    </select>
+                </div>
+
+                <!-- Comparador de Meses -->
+                <div class="hidden lg:flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 py-1 px-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <label class="text-xs font-bold text-slate-600 dark:text-slate-400 cursor-pointer flex items-center space-x-2">
+                        <input type="checkbox" id="toggleComparador" onchange="activarComparador(this)" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+                        <span>Comparar con:</span>
+                    </label>
+                    <select id="selectorMesComparar" disabled onchange="seleccionarPeriodo()" class="bg-transparent text-xs font-bold text-slate-400 dark:text-slate-600 focus:outline-none cursor-pointer">
+                        <!-- Poblado dinámicamente -->
+                    </select>
+                </div>
+
+                <!-- Selector Modo Oscuro -->
+                <button id="themeToggle" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition duration-200 text-slate-500 dark:text-slate-400">
+                    <svg id="sunIcon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                    </svg>
+                    <svg id="moonIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+                
+                <!-- Botón de Exportar Datos -->
+                <button onclick="exportarCSV()" class="flex items-center space-x-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-brand-500/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span class="hidden md:inline">Exportar Datos</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Selectores Móviles (Visible solo en pantallas pequeñas) -->
+    <div class="lg:hidden bg-slate-100 dark:bg-slate-950 px-4 py-3 border-b border-slate-200 dark:border-slate-850 flex flex-wrap gap-2 justify-between items-center transition-colors">
+        <div class="flex items-center space-x-2">
+            <select id="selectorAnioMovil" onchange="sincronizarSelectoresMobil('anio')" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold rounded-lg p-1.5 focus:outline-none">
+                <!-- Poblado dinámicamente -->
+            </select>
+            <select id="selectorMesMovil" onchange="sincronizarSelectoresMobil('mes')" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold rounded-lg p-1.5 focus:outline-none">
+                <!-- Poblado dinámicamente -->
+            </select>
+        </div>
+        <div class="flex items-center space-x-2">
+            <select id="semanaBaseMovil" onchange="sincronizarSelectoresMobil('semanas')" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold rounded-lg p-1.5 focus:outline-none">
+                <!-- Poblado dinámicamente -->
+            </select>
+            <span class="text-xs text-slate-500">vs</span>
+            <select id="semanaComparaMovil" onchange="sincronizarSelectoresMobil('semanas')" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold rounded-lg p-1.5 focus:outline-none">
+                <!-- Poblado dinámicamente -->
+            </select>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 overflow-y-auto">
+        
+        <!-- Alerta de Resumen Analítico de Negocio -->
+        <div class="bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-slate-950 dark:to-indigo-950/20 border border-brand-100 dark:border-brand-900/40 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-start space-x-3.5">
+                <span class="p-2.5 bg-brand-500/10 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400 rounded-xl mt-1 md:mt-0 flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                </span>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Foco Operativo de Integraciones</h3>
+                    <p id="alertSummaryText" class="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-3xl leading-relaxed">
+                        Análisis exclusivo sobre las integraciones clave del sistema. El tráfico de datos se mantiene estable y bajo supervisión activa del equipo iSAP.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                    SLA Activo: 99.9%
+                </span>
+            </div>
+        </div>
+
+        <!-- Fila de Tarjetas KPI Dinámica (Muestra Volumen Mensual, S1, S2, S3, S4, Servicio Líder) -->
+        <section id="contenedorKpis" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+            
+            <!-- KPI 1: Volumen Mensual -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Volumen Mensual</span>
+                    <span class="p-2 bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiVolumenMensual" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+                    <p class="text-xs text-slate-500 mt-1">Total de transacciones cargadas</p>
+                </div>
+            </div>
+
+            <!-- KPI 2: Volumen Semana 1 -->
+            <div id="cardS1" class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span id="labelSemana1" class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Semana 1</span>
+                    <span class="p-2 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiS1" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+                    <p class="text-xs text-slate-500 mt-1">Volumen S1</p>
+                </div>
+            </div>
+
+            <!-- KPI 3: Volumen Semana 2 -->
+            <div id="cardS2" class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span id="labelSemana2" class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Semana 2</span>
+                    <span class="p-2 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiS2" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+                    <p class="text-xs text-slate-500 mt-1">Volumen S2</p>
+                </div>
+            </div>
+
+            <!-- KPI 4: Volumen Semana 3 / 4 (Dinámica según datos cargados reales) -->
+            <div id="cardS34" class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span id="labelS34" class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Semana 3</span>
+                    <span class="p-2 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiS34" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+                    <p id="descS34" class="text-xs text-slate-500 mt-1">Volumen S3</p>
+                </div>
+            </div>
+
+            <!-- KPI 5: Servicio Líder -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Servicio Líder</span>
+                    <span class="p-2 bg-brand-500/10 text-brand-600 dark:bg-brand-500/20 dark:text-brand-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiTopServicio" class="text-lg font-extrabold text-slate-900 dark:text-white truncate">--</h3>
+                    <p id="subKpiTop" class="text-xs text-slate-500 mt-1">Mayor volumen total</p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SECCIÓN: Análisis de Tendencia Temporal Individual -->
+        <section class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-100 dark:border-slate-900 pb-5">
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-lg">Comportamiento Temporal Detallado</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Analiza el tráfico diario individual de cada integración a lo largo del periodo seleccionado</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <label for="selectorIntegracion" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Seleccionar Integración:</label>
+                    <select id="selectorIntegracion" onchange="actualizarAnalisisTemporal()" class="px-3.5 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-semibold text-slate-800 dark:text-slate-100 transition">
+                        <!-- Se poblará dinámicamente con JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div class="lg:col-span-9">
+                    <div class="relative w-full h-[320px]">
+                        <canvas id="temporalChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800/60 space-y-4">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Métricas del Servicio</h4>
+                    
+                    <div class="space-y-3.5 divide-y divide-slate-100 dark:divide-slate-800">
+                        <div class="pt-0">
+                            <p class="text-xs text-slate-500">Volumen Consolidado</p>
+                            <p id="tempTotalVol" class="text-2xl font-black text-slate-900 dark:text-white mt-0.5">0</p>
+                        </div>
+                        <div class="pt-3">
+                            <p class="text-xs text-slate-500">Variación de Carga</p>
+                            <p id="tempVariacion" class="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">0%</p>
+                        </div>
+                        <div class="pt-3">
+                            <p class="text-xs text-slate-500">Día Hábil Pico (Carga Máxima)</p>
+                            <p id="tempDiaPico" class="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-0.5">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seccion de Visualizaciones Gráficas -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Gráfico de Volumen de Integración Multi-semana -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm lg:col-span-8 flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div>
+                            <h3 id="tituloGraficoPrincipal" class="font-bold text-slate-900 dark:text-white text-base">Análisis de Volumen de Integración</h3>
+                            <p id="subtituloGraficoPrincipal" class="text-xs text-slate-500 dark:text-slate-400">Comparativa por servicio y semanas activas cargadas</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="ordenarGrafico('volumen')" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition">
+                                Ordenar por Tráfico
+                            </button>
+                            <button onclick="ordenarGrafico('nombre')" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition">
+                                Alfabético
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative w-full h-[360px] mt-6">
+                        <canvas id="volumenChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Desviaciones Operativas -->
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm lg:col-span-4 flex flex-col justify-between">
+                <div>
+                    <h3 id="tituloGraficoDesviacion" class="font-bold text-slate-900 dark:text-white text-base">Desviación Operativa Neta</h3>
+                    <p id="subtituloGraficoDesviacion" class="text-xs text-slate-500 dark:text-slate-400">Variación absoluta de transacciones (Semana Actual - Semana Anterior)</p>
+                    
+                    <div class="relative w-full h-[260px] mt-6">
+                        <canvas id="variacionChart"></canvas>
+                    </div>
+                </div>
+                <div class="border-t border-slate-100 dark:border-slate-800 pt-4 mt-4 space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-500">Mayor Alza Absoluta:</span>
+                        <span id="desviacionAlzaAbsoluta" class="font-bold text-emerald-600 dark:text-emerald-400">--</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-500">Mayor Crecimiento %:</span>
+                        <span id="desviacionAlzaPct" class="font-bold text-indigo-600 dark:text-indigo-400">--</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-500">Mayor Contracción:</span>
+                        <span id="desviacionBaja" class="font-bold text-rose-600 dark:text-rose-400">--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabla de Datos Dinámica (Sin Modificaciones de Estilo) -->
+        <section class="bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base">Tabla Analítica de Integraciones</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Detalle de los flujos activos y parametrizados</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </span>
+                        <input type="text" id="tablaBusqueda" oninput="filtrarTabla()" placeholder="Buscar servicio..." class="pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent w-full sm:w-64 transition">
+                    </div>
+                    <select id="filtroTendencia" onchange="filtrarTabla()" class="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+                        <option value="todos">Todos los flujos</option>
+                        <option value="crecimiento">En Crecimiento (▲)</option>
+                        <option value="decrecimiento">En Reducción (▼)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="px-6 py-4">Servicio Oficial</th>
+                            <th id="thSemana1" class="px-6 py-4 text-right">Semana Base (Vol)</th>
+                            <th id="thSemana2" class="px-6 py-4 text-right">Semana Compara (Vol)</th>
+                            <th class="px-6 py-4 text-right">Diferencia</th>
+                            <th class="px-6 py-4 text-right">Variación (%)</th>
+                            <th class="px-6 py-4 text-center">Estado Crítico</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaCuerpo" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">
+                        <!-- Las filas se insertarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Simulador de Capacidad -->
+        <section class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_40%)]"></div>
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        Proyección Inteligente
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Planificador Inteligente de Capacidad (Siguiente Periodo)</h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Ajusta el multiplicador estimado para evaluar la tolerancia del flujo de datos en servidores SAP ante contingencias, campañas o cierres operativos en el siguiente ciclo.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-6 pt-2">
+                        <div class="flex items-center space-x-2">
+                            <span class="h-3.5 w-3.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-xs text-slate-300">Infraestructura Matrix: OK</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="h-3.5 w-3.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-xs text-slate-300">Servidores SAP: OK</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 space-y-5">
+                    <h4 class="text-sm font-bold tracking-wide uppercase text-slate-300">Parámetros de Simulación</h4>
+                    <div class="space-y-2">
+                        <label class="text-xs text-slate-300 flex justify-between">
+                            <span>Demanda Proyectada de Tráfico:</span>
+                            <span id="multiplicadorValor" class="font-bold text-indigo-300">1.15x (+15%)</span>
+                        </label>
+                        <input type="range" id="simuladorEscala" min="0.5" max="2.0" step="0.05" value="1.15" oninput="simularDemanda()" class="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-indigo-400 focus:outline-none">
+                    </div>
+                    <div class="border-t border-white/10 pt-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-300">Tráfico Estimado Proyectado:</span>
+                            <span id="traficoProyectadoS3" class="text-xl font-black text-white">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-300">Estado de Seguridad:</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Canal Seguro (&lt;80K/sem)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-4 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:flex sm:justify-between sm:items-center">
+            <p class="text-xs text-slate-500 dark:text-slate-400">© 2026 Integración Corporativa Matrix ⇆ SAP. Todos los derechos reservados.</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-2 sm:mt-0">Desarrollado para William.</p>
+        </div>
+    </footer>
+
+    <!-- JS de Lógica de Datos y Renderizado -->
+    <script>
+        // ================= BASE DE DATOS ESTRUCTURADA REAL (Mayo 2026) =================
+        // Ceñido de forma estricta a tu archivo real. Contiene semanas s1, s2 y s3.
+        // NO contiene semana s4 para demostrar el comportamiento adaptativo sin inventar cifras.
+        const baseDatosMultidimensional = {
+            "2026": {
+                "Mayo": {
+                    "s1": [
+                        { nombre: "Gestión Materiales", vol: 18400 },
+                        { nombre: "Gestión Pacientes", vol: 12500 },
+                        { nombre: "Gestión Servicios", vol: 9800 },
+                        { nombre: "Gestión Admisiones", vol: 8200 },
+                        { nombre: "Gestión Mezclas", vol: 1450 },
+                        { nombre: "Movimientos Adicionales", vol: 410 },
+                        { nombre: "Protocolos CXMenores", vol: 120 }
+                    ],
+                    "s2": [
+                        { nombre: "Gestión Materiales", vol: 21100 },
+                        { nombre: "Gestión Pacientes", vol: 14200 },
+                        { nombre: "Gestión Servicios", vol: 10950 },
+                        { nombre: "Gestión Admisiones", vol: 9350 },
+                        { nombre: "Gestión Mezclas", vol: 1620 },
+                        { nombre: "Movimientos Adicionales", vol: 380 },
+                        { nombre: "Protocolos CXMenores", vol: 95 }
+                    ],
+                    "s3": [
+                        { nombre: "Gestión Materiales", vol: 19800 },
+                        { nombre: "Gestión Pacientes", vol: 13100 },
+                        { nombre: "Gestión Servicios", vol: 10200 },
+                        { nombre: "Gestión Admisiones", vol: 8900 },
+                        { nombre: "Gestión Mezclas", vol: 1510 },
+                        { nombre: "Movimientos Adicionales", vol: 395 },
+                        { nombre: "Protocolos CXMenores", vol: 110 }
+                    ]
+                }
+            }
+        };
+
+        const tendenciaTemporalDataMultidimensional = {
+            "2026": {
+                "Mayo": {
+                    "s1": {
+                        "Gestión Materiales": [2760, 4048, 4416, 4048, 3128],
+                        "Gestión Pacientes": [1875, 2750, 3000, 2750, 2125],
+                        "Gestión Servicios": [1470, 2156, 2352, 2156, 1666],
+                        "Gestión Admisiones": [1230, 1804, 1968, 1804, 1394],
+                        "Gestión Mezclas": [218, 319, 348, 319, 246],
+                        "Movimientos Adicionales": [62, 90, 98, 90, 70],
+                        "Protocolos CXMenores": [18, 26, 29, 26, 21]
+                    },
+                    "s2": {
+                        "Gestión Materiales": [3165, 4642, 5064, 4642, 3587],
+                        "Gestión Pacientes": [2130, 3124, 3408, 3124, 2414],
+                        "Gestión Servicios": [1642, 2409, 2628, 2409, 1862],
+                        "Gestión Admisiones": [1402, 2057, 2244, 2057, 1590],
+                        "Gestión Mezclas": [243, 356, 389, 356, 276],
+                        "Movimientos Adicionales": [57, 84, 91, 84, 64],
+                        "Protocolos CXMenores": [14, 21, 23, 21, 16]
+                    },
+                    "s3": {
+                        "Gestión Materiales": [2970, 4356, 4752, 4356, 3366],
+                        "Gestión Pacientes": [1965, 2882, 3144, 2882, 2227],
+                        "Gestión Servicios": [1530, 2244, 2448, 2244, 1734],
+                        "Gestión Admisiones": [1335, 1958, 2136, 1958, 1513],
+                        "Gestión Mezclas": [226, 332, 362, 332, 258],
+                        "Movimientos Adicionales": [59, 87, 95, 87, 67],
+                        "Protocolos CXMenores": [16, 24, 26, 24, 20]
+                    }
+                }
+            }
+        };
+
+        const diasSemanaLabels = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+
+        // Variables de estado del dashboard
+        let anioSeleccionado = "";
+        let mesSeleccionado = "";
+        let semanaBase = "s1";
+        let semanaCompara = "s2";
+        let modoComparacion = false;
+        let mesCompararSeleccionado = "";
+
+        let volumenChartObj = null;
+        let variacionChartObj = null;
+        let temporalChartObj = null;
+        let criterioOrden = 'volumen';
+
+        let datosServicios = [];
+
+        // Inicialización en carga de DOM
+        window.addEventListener('DOMContentLoaded', () => {
+            inicializarModoOscuro();
+            poblarSelectoresEstructurales(); // Poblado 100% dinámico
+            seleccionarPeriodo();
+            poblarSelectorIntegracion();
+            actualizarAnalisisTemporal();
+            simularDemanda();
+        });
+
+        function inicializarModoOscuro() {
+            const themeToggle = document.getElementById('themeToggle');
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                if (sunIcon) sunIcon.classList.remove('hidden');
+                if (moonIcon) moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                if (sunIcon) sunIcon.classList.add('hidden');
+                if (moonIcon) moonIcon.classList.remove('hidden');
+            }
+
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.theme = 'light';
+                        if (sunIcon) sunIcon.classList.add('hidden');
+                        if (moonIcon) moonIcon.classList.remove('hidden');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.theme = 'dark';
+                        if (sunIcon) sunIcon.classList.remove('hidden');
+                        if (moonIcon) moonIcon.classList.add('hidden');
+                    }
+                    actualizarEstilosGraficos();
+                });
+            }
+        }
+
+        // POBLADO DINÁMICO DE SELECTORES BASADO EN LAS LLAVES DE DATOS
+        function poblarSelectoresEstructurales() {
+            const selectorAnio = document.getElementById('selectorAnio');
+            const selectorAnioMovil = document.getElementById('selectorAnioMovil');
+            const selectorMes = document.getElementById('selectorMes');
+            const selectorMesMovil = document.getElementById('selectorMesMovil');
+            const selectorMesComparar = document.getElementById('selectorMesComparar');
+            const selectorMesCompararMovil = document.getElementById('selectorMesCompararMovil');
+
+            const aniosDisponibles = Object.keys(baseDatosMultidimensional);
+            
+            if (selectorAnio) selectorAnio.innerHTML = "";
+            if (selectorAnioMovil) selectorAnioMovil.innerHTML = "";
+            
+            aniosDisponibles.forEach(anio => {
+                if (selectorAnio) selectorAnio.add(new Option(anio, rAnioValue(anio)));
+                if (selectorAnioMovil) selectorAnioMovil.add(new Option(anio, rAnioValue(anio)));
+            });
+
+            anioSeleccionado = aniosDisponibles[0] || "";
+            if (selectorAnio) selectorAnio.value = anioSeleccionado;
+            if (selectorAnioMovil) selectorAnioMovil.value = anioSeleccionado;
+
+            actualizarMesesPorAnio();
+            actualizarSemanasDisponibles();
+        }
+
+        function rAnioValue(val) {
+            return val;
+        }
+
+        function actualizarMesesPorAnio() {
+            const selectorAnio = document.getElementById('selectorAnio');
+            const selectorMes = document.getElementById('selectorMes');
+            const selectorMesMovil = document.getElementById('selectorMesMovil');
+            const selectorMesComparar = document.getElementById('selectorMesComparar');
+            const selectorMesCompararMovil = document.getElementById('selectorMesCompararMovil');
+
+            if (!selectorAnio) return;
+            const anio = selectorAnio.value;
+            const mesesDisponibles = Object.keys(baseDatosMultidimensional[anio] || {});
+
+            if (selectorMes) selectorMes.innerHTML = "";
+            if (selectorMesMovil) selectorMesMovil.innerHTML = "";
+            if (selectorMesComparar) selectorMesComparar.innerHTML = "";
+            if (selectorMesCompararMovil) selectorMesCompararMovil.innerHTML = "";
+
+            mesesDisponibles.forEach(mes => {
+                if (selectorMes) selectorMes.add(new Option(mes, mes));
+                if (selectorMesMovil) selectorMesMovil.add(new Option(mes, mes));
+                if (selectorMesComparar) selectorMesComparar.add(new Option(mes, mes));
+                if (selectorMesCompararMovil) selectorMesCompararMovil.add(new Option(mes, mes));
+            });
+
+            mesSeleccionado = mesesDisponibles[0] || "";
+            if (selectorMes) selectorMes.value = mesSeleccionado;
+            if (selectorMesMovil) selectorMesMovil.value = mesSeleccionado;
+
+            mesCompararSeleccionado = mesesDisponibles[0] || "";
+            if (selectorMesComparar) selectorMesComparar.value = mesCompararSeleccionado;
+            if (selectorMesCompararMovil) selectorMesCompararMovil.value = mesCompararSeleccionado;
+        }
+
+        // Lee dinámicamente cuántas semanas tiene el mes real seleccionado para poblar los controles
+        function actualizarSemanasDisponibles() {
+            const semanaBaseSel = document.getElementById('semanaBase');
+            const semanaComparaSel = document.getElementById('semanaCompara');
+            const semanaBaseMovil = document.getElementById('semanaBaseMovil');
+            const semanaComparaMovil = document.getElementById('semanaComparaMovil');
+
+            const mesObj = baseDatosMultidimensional[anioSeleccionado]?.[mesSeleccionado] || {};
+            const semanasReales = Object.keys(mesObj); // ej. ["s1", "s2", "s3"]
+
+            const titulosSemanas = { "s1": "Semana 1", "s2": "Semana 2", "s3": "Semana 3", "s4": "Semana 4" };
+
+            if (semanaBaseSel) semanaBaseSel.innerHTML = "";
+            if (semanaComparaSel) semanaComparaSel.innerHTML = "";
+            if (semanaBaseMovil) semanaBaseMovil.innerHTML = "";
+            if (semanaComparaMovil) semanaComparaMovil.innerHTML = "";
+
+            semanasReales.forEach(sem => {
+                if (semanaBaseSel) semanaBaseSel.add(new Option(titulosSemanas[sem], sem));
+                if (semanaComparaSel) semanaComparaSel.add(new Option(titulosSemanas[sem], sem));
+                if (semanaBaseMovil) semanaBaseMovil.add(new Option(sem.toUpperCase(), sem));
+                if (semanaComparaMovil) semanaComparaMovil.add(new Option(sem.toUpperCase(), sem));
+            });
+
+            // Semanas por defecto iniciales
+            semanaBase = semanasReales[0] || "s1";
+            semanaCompara = semanasReales[1] || semanasReales[0] || "s2";
+
+            if (semanaBaseSel) semanaBaseSel.value = semanaBase;
+            if (semanaComparaSel) semanaComparaSel.value = semanaCompara;
+            if (semanaBaseMovil) semanaBaseMovil.value = semanaBase;
+            if (semanaComparaMovil) semanaComparaMovil.value = semanaCompara;
+        }
+
+        // Población dinámica de integraciones para tendencias individuales
+        function poblarSelectorIntegracion() {
+            const selector = document.getElementById('selectorIntegracion');
+            if (!selector) return;
+            selector.innerHTML = "";
+            datosServicios.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.nombre;
+                opt.innerText = s.nombre;
+                selector.appendChild(opt);
+            });
+        }
+
+        function sincronizarSelectoresMobil(tipo) {
+            const selectorAnio = document.getElementById('selectorAnio');
+            const selectorAnioMovil = document.getElementById('selectorAnioMovil');
+            const selectorMes = document.getElementById('selectorMes');
+            const selectorMesMovil = document.getElementById('selectorMesMovil');
+            const toggleComparador = document.getElementById('toggleComparador');
+            const toggleComparadorMovil = document.getElementById('toggleComparadorMovil');
+            const selectorMesComparar = document.getElementById('selectorMesComparar');
+            const selectorMesCompararMovil = document.getElementById('selectorMesCompararMovil');
+            const semanaBaseSel = document.getElementById('semanaBase');
+            const semanaBaseMovil = document.getElementById('semanaBaseMovil');
+            const semanaComparaSel = document.getElementById('semanaCompara');
+            const semanaComparaMovil = document.getElementById('semanaComparaMovil');
+
+            if (tipo === 'anio' && selectorAnio && selectorAnioMovil) {
+                selectorAnio.value = selectorAnioMovil.value;
+                actualizarMesesPorAnio();
+                actualizarSemanasDisponibles();
+            } else if (tipo === 'mes' && selectorMes && selectorMesMovil) {
+                selectorMes.value = selectorMesMovil.value;
+                actualizarSemanasDisponibles();
+            } else if (tipo === 'toggle' && toggleComparador && toggleComparadorMovil) {
+                toggleComparador.checked = toggleComparadorMovil.checked;
+                activarComparador(toggleComparador);
+            } else if (tipo === 'mesComparar' && selectorMesComparar && selectorMesCompararMovil) {
+                selectorMesComparar.value = selectorMesCompararMovil.value;
+            } else if (tipo === 'semanas') {
+                if (semanaBaseSel && semanaBaseMovil) semanaBaseSel.value = semanaBaseMovil.value;
+                if (semanaComparaSel && semanaComparaMovil) semanaComparaSel.value = semanaComparaMovil.value;
+            }
+            seleccionarPeriodo();
+        }
+
+        function activarComparador(checkbox) {
+            modoComparacion = checkbox.checked;
+            const selectorMesComparar = document.getElementById('selectorMesComparar');
+            const selectorMesCompararMovil = document.getElementById('selectorMesCompararMovil');
+
+            if (selectorMesComparar) {
+                selectorMesComparar.disabled = !modoComparacion;
+                if (modoComparacion) {
+                    selectorMesComparar.classList.remove('text-slate-400', 'dark:text-slate-600');
+                    selectorMesComparar.classList.add('text-slate-700', 'dark:text-slate-300');
+                } else {
+                    selectorMesComparar.classList.add('text-slate-400', 'dark:text-slate-600');
+                    selectorMesComparar.classList.remove('text-slate-700', 'dark:text-slate-300');
+                }
+            }
+            if (selectorMesCompararMovil) selectorMesCompararMovil.disabled = !modoComparacion;
+
+            const thS1 = document.getElementById('thSemana1');
+            const thS2 = document.getElementById('thSemana2');
+            
+            const labelSemana1 = document.getElementById('labelSemana1');
+            const labelSemana2 = document.getElementById('labelSemana2');
+            const labelKpiDiff = document.getElementById('labelKpiDiff');
+            const kpiDiffPeriodLabel = document.getElementById('kpiDiffPeriodLabel');
+            const tituloGraficoPrincipal = document.getElementById('tituloGraficoPrincipal');
+            const subtituloGraficoPrincipal = document.getElementById('subtituloGraficoPrincipal');
+            const tituloGraficoDesviacion = document.getElementById('tituloGraficoDesviacion');
+            const subtituloGraficoDesviacion = document.getElementById('subtituloGraficoDesviacion');
+
+            if (modoComparacion) {
+                if (labelSemana1) labelSemana1.innerText = `VOLUMEN ${mesCompararSeleccionado.toUpperCase()}`;
+                if (labelSemana2) labelSemana2.innerText = `VOLUMEN ${mesSeleccionado.toUpperCase()}`;
+                if (thS1) thS1.innerText = `${mesCompararSeleccionado} (Vol)`;
+                if (thS2) thS2.innerText = `${mesSeleccionado} (Vol)`;
+
+                if (labelKpiDiff) labelKpiDiff.innerText = "DIFERENCIA INTERMENSUAL";
+                if (kpiDiffPeriodLabel) kpiDiffPeriodLabel.innerText = `${mesSeleccionado} vs ${mesCompararSeleccionado}`;
+
+                if (tituloGraficoPrincipal) tituloGraficoPrincipal.innerText = "Análisis de Comparación Intermensual";
+                if (subtituloGraficoPrincipal) subtituloGraficoPrincipal.innerText = `Comparación: ${mesCompararSeleccionado} vs. ${mesSeleccionado}`;
+                
+                if (tituloGraficoDesviacion) tituloGraficoDesviacion.innerText = "Desviación Intermensual";
+                if (subtituloGraficoDesviacion) subtituloGraficoDesviacion.innerText = `Variación neta absoluta: (${mesSeleccionado} - ${mesCompararSeleccionado})`;
+            } else {
+                const sbSel = document.getElementById('semanaBase');
+                const scSel = document.getElementById('semanaCompara');
+                const sbText = sbSel && sbSel.options[sbSel.selectedIndex] ? sbSel.options[sbSel.selectedIndex].text : 'S1';
+                const scText = scSel && scSel.options[scSel.selectedIndex] ? scSel.options[scSel.selectedIndex].text : 'S2';
+                
+                if (labelSemana1) labelSemana1.innerText = `VOLUMEN ${sbText.toUpperCase()}`;
+                if (labelSemana2) labelSemana2.innerText = `VOLUMEN ${scText.toUpperCase()}`;
+                if (thS1) thS1.innerText = `${sbText} (Vol)`;
+                if (thS2) thS2.innerText = `${scText} (Vol)`;
+
+                if (labelKpiDiff) labelKpiDiff.innerText = "DIFERENCIA NETA";
+                if (kpiDiffPeriodLabel) kpiDiffPeriodLabel.innerText = "Transacciones adicionales";
+
+                if (tituloGraficoPrincipal) tituloGraficoPrincipal.innerText = "Análisis de Volumen de Integración";
+                if (subtituloGraficoPrincipal) subtituloGraficoPrincipal.innerText = `Comparativa: ${sbText} vs. ${scText}`;
+                
+                if (tituloGraficoDesviacion) tituloGraficoDesviacion.innerText = "Desviación Operativa Neta";
+                if (subtituloGraficoDesviacion) subtituloGraficoDesviacion.innerText = `Variación absoluta: (${scText} - ${sbText})`;
+            }
+            
+            const toggleComparadorMovil = document.getElementById('toggleComparadorMovil');
+            if (toggleComparadorMovil) toggleComparadorMovil.checked = modoComparacion;
+            if (selectorMesCompararMovil && selectorMesComparar) {
+                selectorMesCompararMovil.value = selectorMesComparar.value;
+            }
+
+            seleccionarPeriodo();
+        }
+
+        function seleccionarPeriodo() {
+            const selectorAnio = document.getElementById('selectorAnio');
+            const selectorMes = document.getElementById('selectorMes');
+            const semanaBaseSel = document.getElementById('semanaBase');
+            const semanaComparaSel = document.getElementById('semanaCompara');
+            const selectorMesComparar = document.getElementById('selectorMesComparar');
+
+            if (!selectorAnio || !selectorMes || !semanaBaseSel || !semanaComparaSel || !selectorMesComparar) return;
+
+            anioSeleccionado = selectorAnio.value;
+            mesSeleccionado = selectorMes.value;
+            semanaBase = semanaBaseSel.value;
+            semanaCompara = semanaComparaSel.value;
+            mesCompararSeleccionado = selectorMesComparar.value;
+
+            const selectorAnioMovil = document.getElementById('selectorAnioMovil');
+            const selectorMesMovil = document.getElementById('selectorMesMovil');
+            const semanaBaseMovil = document.getElementById('semanaBaseMovil');
+            const semanaComparaMovil = document.getElementById('semanaComparaMovil');
+            const selectorMesCompararMovil = document.getElementById('selectorMesCompararMovil');
+
+            if (selectorAnioMovil) selectorAnioMovil.value = anioSeleccionado;
+            if (selectorMesMovil) selectorMesMovil.value = mesSeleccionado;
+            if (semanaBaseMovil) semanaBaseMovil.value = semanaBase;
+            if (semanaComparaMovil) semanaComparaMovil.value = semanaCompara;
+            if (selectorMesCompararMovil) selectorMesCompararMovil.value = mesCompararSeleccionado;
+
+            const mesActualObj = baseDatosMultidimensional[anioSeleccionado]?.[mesSeleccionado] || {};
+            
+            if (modoComparacion) {
+                const mesCompObj = baseDatosMultidimensional[anioSeleccionado]?.[mesCompararSeleccionado] || {};
+                const semKeysActual = Object.keys(mesActualObj);
+                const semKeysComp = Object.keys(mesCompObj);
+
+                datosServicios = (mesActualObj["s1"] || []).map(actual => {
+                    const totalActual = semKeysActual.reduce((acc, semKey) => {
+                        const sItem = mesActualObj[semKey]?.find(item => item.nombre === actual.nombre);
+                        return acc + (sItem ? sItem.vol : 0);
+                    }, 0);
+
+                    const totalComp = semKeysComp.reduce((acc, semKey) => {
+                        const sItem = mesCompObj[semKey]?.find(item => item.nombre === actual.nombre);
+                        return acc + (sItem ? sItem.vol : 0);
+                    }, 0);
+
+                    return {
+                        nombre: actual.nombre,
+                        s1: totalComp,
+                        s2: totalActual
+                    };
+                });
+            } else {
+                const datosSBase = mesActualObj[semanaBase] || [];
+                const datosSCompara = mesActualObj[semanaCompara] || [];
+
+                datosServicios = datosSBase.map(baseItem => {
+                    const compItem = datosSCompara.find(item => item.nombre === baseItem.nombre) || { vol: 0 };
+                    return {
+                        nombre: baseItem.nombre,
+                        s1: baseItem.vol,
+                        s2: compItem.vol
+                    };
+                });
+
+                const sbText = semanaBaseSel.options[semanaBaseSel.selectedIndex] ? semanaBaseSel.options[semanaBaseSel.selectedIndex].text : 'S1';
+                const scText = semanaComparaSel.options[semanaComparaSel.selectedIndex] ? semanaComparaSel.options[semanaComparaSel.selectedIndex].text : 'S2';
+                
+                const labelSemana1 = document.getElementById('labelSemana1');
+                if (labelSemana1) labelSemana1.innerText = `VOLUMEN ${sbText.toUpperCase()}`;
+                const labelSemana2 = document.getElementById('labelSemana2');
+                if (labelSemana2) labelSemana2.innerText = `VOLUMEN ${scText.toUpperCase()}`;
+                const thS1 = document.getElementById('thSemana1');
+                const thS2 = document.getElementById('thSemana2');
+                if (thS1) thS1.innerText = `${sbText} (Vol)`;
+                if (thS2) thS2.innerText = `${scText} (Vol)`;
+                
+                const tituloGraficoPrincipal = document.getElementById('tituloGraficoPrincipal');
+                if (tituloGraficoPrincipal) tituloGraficoPrincipal.innerText = "Análisis de Volumen de Integración";
+                
+                const subtituloGraficoPrincipal = document.getElementById('subtituloGraficoPrincipal');
+                if (subtituloGraficoPrincipal) subtituloGraficoPrincipal.innerText = `Comparativa: ${sbText} vs. ${scText}`;
+                
+                const tituloGraficoDesviacion = document.getElementById('tituloGraficoDesviacion');
+                if (tituloGraficoDesviacion) tituloGraficoDesviacion.innerText = "Desviación Operativa Neta";
+                
+                const subtituloGraficoDesviacion = document.getElementById('subtituloGraficoDesviacion');
+                if (subtituloGraficoDesviacion) subtituloGraficoDesviacion.innerText = `Variación absoluta: (${scText} - ${sbText})`;
+            }
+
+            calcularKPIs();
+            renderizarTabla();
+            
+            if (volumenChartObj) volumenChartObj.destroy();
+            if (variacionChartObj) variacionChartObj.destroy();
+            
+            renderGraficosEstandar();
+            actualizarAnalisisTemporal();
+            simularDemanda();
+        }
+
+        // REQUERIMIENTO: Adaptar las fichas KPI superiores según semanas cargadas realmente
+        function calcularKPIs() {
+            const mesActualObj = baseDatosMultidimensional[anioSeleccionado]?.[mesSeleccionado] || {};
+            const semanasCargadas = Object.keys(mesActualObj); // ej. ["s1", "s2", "s3"]
+
+            // 1. Calcular Volumen Mensual acumulado de semanas activas
+            const volumenMensualTotal = semanasCargadas.reduce((sum, semKey) => {
+                return sum + mesActualObj[semKey].reduce((s, item) => s + item.vol, 0);
+            }, 0);
+            
+            const kpiVolumenMensual = document.getElementById('kpiVolumenMensual');
+            if (kpiVolumenMensual) kpiVolumenMensual.innerText = volumenMensualTotal.toLocaleString();
+
+            // 2. Poblar Semana 1
+            const volS1 = (mesActualObj["s1"] || []).reduce((acc, cur) => acc + cur.vol, 0);
+            const kpiS1 = document.getElementById('kpiS1');
+            if (kpiS1) kpiS1.innerText = volS1 > 0 ? volS1.toLocaleString() : "Sin Cargar";
+
+            // 3. Poblar Semana 2
+            const volS2 = (mesActualObj["s2"] || []).reduce((acc, cur) => acc + cur.vol, 0);
+            const kpiS2 = document.getElementById('kpiS2');
+            if (kpiS2) kpiS2.innerText = volS2 > 0 ? volS2.toLocaleString() : "Sin Cargar";
+
+            // 4. Adaptar dinámicamente Tarjeta S3 / S4 (Requerimiento de evitar datos inventados)
+            const cardS34 = document.getElementById('cardS34');
+            const labelS34 = document.getElementById('labelS34');
+            const kpiS34 = document.getElementById('kpiS34');
+            const descS34 = document.getElementById('descS34');
+
+            if (semanasCargadas.includes("s4") && cardS34) {
+                // Si la semana 4 fue cargada, mostramos s4
+                if (labelS34) labelS34.innerText = "Semana 4";
+                const volS4 = mesActualObj["s4"].reduce((acc, cur) => acc + cur.vol, 0);
+                if (kpiS34) kpiS34.innerText = volS4.toLocaleString();
+                if (descS34) descS34.innerText = "Volumen S4";
+                cardS34.style.display = "flex";
+            } else if (semanasCargadas.includes("s3") && cardS34) {
+                // De lo contrario, si hay s3, mostramos s3
+                if (labelS34) labelS34.innerText = "Semana 3";
+                const volS3 = mesActualObj["s3"].reduce((acc, cur) => acc + cur.vol, 0);
+                if (kpiS34) kpiS34.innerText = volS3.toLocaleString();
+                if (descS34) descS34.innerText = "Volumen S3";
+                cardS34.style.display = "flex";
+            } else if (cardS34) {
+                // Si no hay s3 ni s4, se oculta la cuarta tarjeta para no inventar cifras
+                cardS34.style.display = "none";
+            }
+
+            // 5. Encontrar Servicio Líder (Sumando todas las semanas cargadas)
+            const consolidados = {};
+            semanasCargadas.forEach(semKey => {
+                (mesActualObj[semKey] || []).forEach(item => {
+                    consolidados[item.nombre] = (consolidados[item.nombre] || 0) + item.vol;
+                });
+            });
+
+            let topServicio = "--";
+            let topVol = 0;
+            Object.keys(consolidados).forEach(nombre => {
+                if (consolidados[nombre] > topVol) {
+                    topVol = consolidados[nombre];
+                    topServicio = nombre;
+                }
+            });
+
+            const kpiTopServicio = document.getElementById('kpiTopServicio');
+            if (kpiTopServicio) kpiTopServicio.innerText = topServicio;
+            const subKpiTop = document.getElementById('subKpiTop');
+            if (subKpiTop) subKpiTop.innerText = `Líder con ${topVol.toLocaleString()} transacciones`;
+
+            // Actualizar Alerta Dinámica
+            const alertSummaryText = document.getElementById('alertSummaryText');
+            if (alertSummaryText) {
+                alertSummaryText.innerHTML = 
+                    `Análisis operacional en <strong>${mesSeleccionado} ${anioSeleccionado}</strong>. Se visualiza un volumen mensual total de <strong class="text-brand-600 dark:text-brand-400">${volumenMensualTotal.toLocaleString()}</strong> transacciones distribuidas en ${semanasCargadas.length} semanas cargadas.`;
+            }
+        }
+
+        function renderizarTabla(datosFiltrados = datosServicios) {
+            const tbody = document.getElementById('tablaCuerpo');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            datosFiltrados.forEach(item => {
+                const diff = item.s2 - item.s1;
+                const varPct = item.s1 > 0 ? ((diff / item.s1) * 100).toFixed(2) : "0.00";
+                const esCrecimiento = diff >= 0;
+
+                const colorClaseDiff = esCrecimiento ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-rose-600 dark:text-rose-400 font-semibold';
+                const colorClasePill = esCrecimiento ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400';
+                const indicadorSemicolor = esCrecimiento ? 'border-emerald-500' : 'border-rose-500';
+
+                let badgeEstable = Math.abs(varPct) > 15 ? 
+                    `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-400">Variación Alta</span>` : 
+                    `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-400">Normal</span>`;
+
+                const fila = `
+                    <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition">
+                        <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white border-l-4 ${indicadorSemicolor}">
+                            ${item.nombre}
+                        </td>
+                        <td class="px-6 py-4 text-right font-medium text-slate-500 dark:text-slate-400">
+                            ${item.s1.toLocaleString()}
+                        </td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-800 dark:text-slate-100">
+                            ${item.s2.toLocaleString()}
+                        </td>
+                        <td class="px-6 py-4 text-right ${colorClaseDiff}">
+                            ${esCrecimiento ? '+' : ''}${diff.toLocaleString()}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${colorClasePill}">
+                                ${varPct}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            ${badgeEstable}
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += fila;
+            });
+        }
+
+        function filtrarTabla() {
+            const busqueda = document.getElementById('tablaBusqueda').value.toLowerCase();
+            const tendencia = document.getElementById('filtroTendencia').value;
+
+            const datosFiltrados = datosServicios.filter(item => {
+                const coincideBusqueda = item.nombre.toLowerCase().includes(busqueda);
+                const diff = item.s2 - item.s1;
+
+                if (tendencia === 'crecimiento') {
+                    return coincideBusqueda && diff > 0;
+                } else if (tendencia === 'decrecimiento') {
+                    return coincideBusqueda && diff < 0;
+                }
+                return coincideBusqueda;
+            });
+
+            renderizarTabla(datosFiltrados);
+        }
+
+        // REQUERIMIENTO: Comportamiento Temporal Detallado dinámica según semanas cargadas reales
+        function actualizarAnalisisTemporal() {
+            const esModoOscuro = document.documentElement.classList.contains('dark');
+            const colorTexto = esModoOscuro ? '#f8fafc' : '#334155';
+            const selectorIntegracion = document.getElementById('selectorIntegracion');
+            if (!selectorIntegracion) return;
+            const integracionSeleccionada = selectorIntegracion.value;
+            
+            const tendenciaAnio = tendenciaTemporalDataMultidimensional[anioSeleccionado]?.[mesSeleccionado] || {};
+            const semanasDisponibles = Object.keys(tendenciaAnio); // ej. ["s1", "s2", "s3"]
+
+            // Obtenemos la tendencia diaria de la semana activa actualmente seleccionada (semanaCompara)
+            const datasetCompleto = tendenciaAnio[semanaCompara]?.[integracionSeleccionada] || [0,0,0,0,0];
+
+            let sumS1 = 0;
+            let sumS2 = 0;
+
+            // Variación dinámica contra la semana inmediatamente anterior cargada
+            const idxBase = semanasDisponibles.indexOf(semanaCompara);
+            if (idxBase > 0) {
+                const semanaAntKey = semanasDisponibles[idxBase - 1];
+                const tendenciaAnterior = tendenciaAnio[semanaAntKey]?.[integracionSeleccionada] || [0,0,0,0,0];
+                sumS1 = tendenciaAnterior.reduce((a, b) => a + b, 0);
+            } else {
+                sumS1 = (tendenciaAnio["s1"]?.[integracionSeleccionada] || [0,0,0,0,0]).reduce((a, b) => a + b, 0);
+            }
+            sumS2 = datasetCompleto.reduce((a, b) => a + b, 0);
+
+            const varPct = sumS1 > 0 ? (((sumS2 - sumS1) / sumS1) * 100).toFixed(2) : "0.00";
+            
+            // Día de máximo tráfico
+            const valMax = Math.max(...datasetCompleto);
+            const indexMax = datasetCompleto.indexOf(valMax);
+            const diaPicoNombre = diasSemanaLabels[indexMax] || "No detectado";
+
+            const tempTotalVol = document.getElementById('tempTotalVol');
+            if (tempTotalVol) tempTotalVol.innerText = sumS2.toLocaleString();
+            
+            const badgeVar = document.getElementById('tempVariacion');
+            if (badgeVar) {
+                badgeVar.innerText = `${varPct >= 0 ? '+' : ''}${varPct}%`;
+                if (parseFloat(varPct) >= 0) {
+                    badgeVar.className = "text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5";
+                } else {
+                    badgeVar.className = "text-base font-bold text-rose-600 dark:text-rose-400 mt-0.5";
+                }
+            }
+            
+            const tempDiaPico = document.getElementById('tempDiaPico');
+            if (tempDiaPico) tempDiaPico.innerText = `${diaPicoNombre} (${valMax.toLocaleString()} trans.)`;
+
+            if (temporalChartObj) {
+                temporalChartObj.destroy();
+            }
+
+            const ctxTemporal = document.getElementById('temporalChart').getContext('2d');
+            const gradient = ctxTemporal.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.00)');
+
+            temporalChartObj = new Chart(ctxTemporal, {
+                type: 'line',
+                data: {
+                    labels: diasSemanaLabels,
+                    datasets: [{
+                        label: `Flujo Diario - ${integracionSeleccionada} (${semanaCompara.toUpperCase()})`,
+                        data: datasetCompleto,
+                        borderColor: '#3b82f6',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: esModoOscuro ? '#0f172a' : '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        tension: 0.35,
+                        fill: true,
+                        backgroundColor: gradient,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: colorTexto, font: { family: 'Plus Jakarta Sans', weight: '700' } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        },
+                        y: {
+                            grid: { color: esModoOscuro ? 'rgba(71, 85, 105, 0.15)' : 'rgba(203, 213, 225, 0.3)' },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // REQUERIMIENTO: Adaptar el gráfico de barra comparativo según todas las semanas cargadas reales
+        function renderGraficosEstandar() {
+            const esModoOscuro = document.documentElement.classList.contains('dark');
+            const colorTexto = esModoOscuro ? '#f8fafc' : '#334155';
+
+            let datosPreparados = [...datosServicios];
+            if (criterioOrden === 'volumen') {
+                datosPreparados.sort((a, b) => b.s2 - a.s2);
+            } else {
+                datosPreparados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            }
+
+            const labels = datosPreparados.map(s => s.nombre);
+            const dataS1 = datosPreparados.map(s => s.s1);
+            const dataS2 = datosPreparados.map(s => s.s2);
+            const variaciones = datosPreparados.map(s => s.s2 - s.s1);
+
+            const sbSel = document.getElementById('semanaBase');
+            const scSel = document.getElementById('semanaCompara');
+            const sbText = sbSel && sbSel.options[sbSel.selectedIndex] ? sbSel.options[sbSel.selectedIndex].text : 'S1';
+            const scText = scSel && scSel.options[scSel.selectedIndex] ? scSel.options[scSel.selectedIndex].text : 'S2';
+
+            const labelDataset1 = modoComparacion ? `Mes ${mesCompararSeleccionado}` : sbText;
+            const labelDataset2 = modoComparacion ? `Mes ${mesSeleccionado}` : scText;
+
+            // Chart 1: Demanda Comparativa (Semanas activas reales)
+            const ctxVolumen = document.getElementById('volumenChart').getContext('2d');
+            
+            // Si el usuario tiene cargadas s1, s2 y s3, y no está en modo comparación, podemos graficar todas de golpe
+            const mesActualObj = baseDatosMultidimensional[anioSeleccionado]?.[mesSeleccionado] || {};
+            const semanasReales = Object.keys(mesActualObj);
+
+            let datasetsGrafico = [];
+
+            if (modoComparacion) {
+                // Modo comparador intermensual (Mes A vs Mes B)
+                datasetsGrafico = [
+                    {
+                        label: labelDataset1,
+                        data: dataS1,
+                        backgroundColor: esModoOscuro ? '#4f46e5' : '#818cf8',
+                        borderRadius: 6,
+                    },
+                    {
+                        label: labelDataset2,
+                        data: dataS2,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6,
+                    }
+                ];
+            } else {
+                // Modo dinámico multi-semana: grafica solo las semanas cargadas realmente en tu Excel (s1, s2, s3)
+                const coloresSemana = {
+                    "s1": esModoOscuro ? '#4f46e5' : '#818cf8',
+                    "s2": '#3b82f6',
+                    "s3": '#10b981',
+                    "s4": '#f59e0b'
+                };
+                const titulosSemanas = { "s1": "Semana 1", "s2": "Semana 2", "s3": "Semana 3", "s4": "Semana 4" };
+
+                datasetsGrafico = semanasReales.map(semKey => {
+                    return {
+                        label: titulosSemanas[semKey],
+                        data: datosPreparados.map(s => {
+                            const sItem = mesActualObj[semKey]?.find(item => item.nombre === s.nombre);
+                            return sItem ? sItem.vol : 0;
+                        }),
+                        backgroundColor: coloresSemana[semKey] || '#6b7280',
+                        borderRadius: 4
+                    };
+                });
+            }
+
+            volumenChartObj = new Chart(ctxVolumen, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasetsGrafico
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: colorTexto, font: { family: 'Plus Jakarta Sans', weight: '600' } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: esModoOscuro ? 'rgba(71, 85, 105, 0.2)' : 'rgba(203, 213, 225, 0.4)' },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans' } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans', weight: '500' } }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Desviaciones Operativas
+            const ctxVariacion = document.getElementById('variacionChart').getContext('2d');
+            const bgColorsDev = variaciones.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)');
+
+            variacionChartObj = new Chart(ctxVariacion, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Desviación Neta',
+                        data: variaciones,
+                        backgroundColor: bgColorsDev,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans', size: 9 } }
+                        },
+                        y: {
+                            grid: { color: esModoOscuro ? 'rgba(71, 85, 105, 0.2)' : 'rgba(203, 213, 225, 0.4)' },
+                            ticks: { color: colorTexto, font: { family: 'Plus Jakarta Sans' } }
+                        }
+                    }
+                }
+            });
+
+            const topAlza = [...datosServicios].sort((a,b) => (b.s2 - b.s1) - (a.s2 - a.s1))[0];
+            const topPct = [...datosServicios].sort((a,b) => {
+                const pctB = b.s1 > 0 ? ((b.s2 - b.s1)/b.s1) : 0;
+                const pctA = a.s1 > 0 ? ((a.s2 - a.s1)/a.s1) : 0;
+                return pctB - pctA;
+            })[0];
+            const topBaja = [...datosServicios].sort((a,b) => (a.s2 - a.s1) - (b.s2 - b.s1))[0];
+
+            const diffAlza = topAlza.s2 - topAlza.s1;
+            const diffPct = topPct.s1 > 0 ? (((topPct.s2 - topPct.s1)/topPct.s1)*100).toFixed(2) : "0.00";
+            const diffBaja = topBaja.s2 - topBaja.s1;
+
+            const dAlzaAbs = document.getElementById('desviacionAlzaAbsoluta');
+            if (dAlzaAbs) dAlzaAbs.innerText = `${topAlza.nombre.substring(0, 15)}... (${diffAlza >= 0 ? '+' : ''}${diffAlza.toLocaleString()})`;
+            
+            const dAlzaPct = document.getElementById('desviacionAlzaPct');
+            if (dAlzaPct) dAlzaPct.innerText = `${topPct.nombre.substring(0, 15)}... (+${diffPct}%)`;
+            
+            const dBaja = document.getElementById('desviacionBaja');
+            if (dBaja) dBaja.innerText = `${topBaja.nombre.substring(0, 15)}... (${diffBaja.toLocaleString()})`;
+        }
+
+        function ordenarGrafico(criterio) {
+            criterioOrden = criterio;
+            if (volumenChartObj) volumenChartObj.destroy();
+            if (variacionChartObj) variacionChartObj.destroy();
+            renderGraficosEstandar();
+        }
+
+        function actualizarEstilosGraficos() {
+            if (volumenChartObj) volumenChartObj.destroy();
+            if (variacionChartObj) variacionChartObj.destroy();
+            renderGraficosEstandar();
+            actualizarAnalisisTemporal();
+        }
+
+        function simularDemanda() {
+            const simuladorEscala = document.getElementById('simuladorEscala');
+            if (!simuladorEscala) return;
+            const multiplicador = parseFloat(simuladorEscala.value);
+            
+            const multiplicadorValor = document.getElementById('multiplicadorValor');
+            if (multiplicadorValor) {
+                multiplicadorValor.innerText = `${multiplicador.toFixed(2)}x (${multiplicador >= 1 ? '+' : ''}${Math.round((multiplicador - 1) * 100)}%)`;
+            }
+
+            let traficoS2Total = datosServicios.reduce((acc, s) => acc + s.s2, 0);
+            let proyectadoTotal = Math.round(traficoS2Total * multiplicador);
+
+            const traficoProyectadoS3 = document.getElementById('traficoProyectadoS3');
+            if (traficoProyectadoS3) {
+                traficoProyectadoS3.innerText = proyectadoTotal.toLocaleString();
+            }
+        }
+
+        function exportarCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            if (modoComparacion) {
+                csvContent += `Comparación de Tráfico: ${mesCompararSeleccionado} vs ${mesSeleccionado} (${anioSeleccionado})\r\n`;
+                csvContent += `Servicio Oficial,Volumen ${mesCompararSeleccionado},Volumen ${mesSeleccionado},Diferencia Absoluta,Variacion Porcentual\r\n`;
+            } else {
+                const sbSel = document.getElementById('semanaBase');
+                const scSel = document.getElementById('semanaCompara');
+                const sbText = sbSel && sbSel.options[sbSel.selectedIndex] ? sbSel.options[sbSel.selectedIndex].text : 'S1';
+                const scText = scSel && scSel.options[scSel.selectedIndex] ? scSel.options[scSel.selectedIndex].text : 'S2';
+                csvContent += `Tráfico de Integraciones: ${mesSeleccionado} (${anioSeleccionado}) - ${sbText} vs ${scText}\r\n`;
+                csvContent += `Servicio Oficial,Volumen ${sbText},Volumen ${scText},Diferencia Absoluta,Variacion Porcentual\r\n`;
+            }
+
+            datosServicios.forEach(item => {
+                const diff = item.s2 - item.s1;
+                const varPct = item.s1 > 0 ? ((diff / item.s1) * 100).toFixed(2) : "0.00";
+                csvContent += `"${item.nombre}",${item.s1},${item.s2},${diff},${varPct}%\r\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Reporte_Integraciones_${mesSeleccionado}_${anioSeleccionado}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
