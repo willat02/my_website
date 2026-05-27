@@ -438,15 +438,14 @@
     <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-4 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:flex sm:justify-between sm:items-center">
             <p class="text-xs text-slate-500 dark:text-slate-400">© 2026 Integración Corporativa Matrix ⇆ SAP. Todos los derechos reservados.</p>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-2 sm:mt-0">Desarrollado para William.</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-2 sm:mt-0">Desarrollado por William Atehortua.</p>
         </div>
     </footer>
 
     <!-- JS de Lógica de Datos y Renderizado -->
     <script>
         // ================= BASE DE DATOS ESTRUCTURADA REAL (Mayo 2026) =================
-        // Ceñido de forma estricta a tu archivo real. Contiene semanas s1, s2 y s3.
-        // NO contiene semana s4 para demostrar el comportamiento adaptativo sin inventar cifras.
+        // Ceñido de forma estricta a tu archivo real. Contiene semanas s1, s2, s3 y s4.
         const baseDatosMultidimensional = {
             "2026": {
                 "Mayo": {
@@ -476,6 +475,15 @@
                         { nombre: "Gestión Mezclas", vol: 1510 },
                         { nombre: "Movimientos Adicionales", vol: 395 },
                         { nombre: "Protocolos CXMenores", vol: 110 }
+                    ],
+                    "s4": [
+                        { nombre: "Gestión Materiales", vol: 38615 },
+                        { nombre: "Gestión Pacientes", vol: 6746 },
+                        { nombre: "Gestión Servicios", vol: 35598 },
+                        { nombre: "Gestión Admisiones", vol: 10515 },
+                        { nombre: "Gestión Mezclas", vol: 4532 },
+                        { nombre: "Movimientos Adicionales", vol: 1648 },
+                        { nombre: "Protocolos CXMenores", vol: 109 }
                     ]
                 }
             }
@@ -510,6 +518,15 @@
                         "Gestión Mezclas": [226, 332, 362, 332, 258],
                         "Movimientos Adicionales": [59, 87, 95, 87, 67],
                         "Protocolos CXMenores": [16, 24, 26, 24, 20]
+                    },
+                    "s4": {
+                        "Gestión Materiales": [19330, 19285],
+                        "Gestión Pacientes": [3354, 3392],
+                        "Gestión Servicios": [19461, 16137],
+                        "Gestión Admisiones": [4704, 5811],
+                        "Gestión Mezclas": [2136, 2396],
+                        "Movimientos Adicionales": [945, 703],
+                        "Protocolos CXMenores": [55, 54]
                     }
                 }
             }
