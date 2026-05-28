@@ -163,7 +163,7 @@
         </div>
 
         <!-- Fila de Tarjetas KPI Dinámica (Muestra Volumen Mensual, S1, S2, S3, S4, Servicio Líder) -->
-        <section id="contenedorKpis" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+        <section id="contenedorKpis" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
             
             <!-- KPI 1: Volumen Mensual -->
             <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
@@ -184,7 +184,7 @@
             <!-- KPI 2: Volumen Semana 1 -->
             <div id="cardS1" class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
                 <div class="flex items-center justify-between">
-                    <span id="labelSemana1" class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Semana 1</span>
+                    <span id="labelSemana1" class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Volumen Semana 1</span>
                     <span class="p-2 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -200,7 +200,7 @@
             <!-- KPI 3: Volumen Semana 2 -->
             <div id="cardS2" class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
                 <div class="flex items-center justify-between">
-                    <span id="labelSemana2" class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Semana 2</span>
+                    <span id="labelSemana2" class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Volumen Semana 2</span>
                     <span class="p-2 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -213,10 +213,10 @@
                 </div>
             </div>
 
-            <!-- KPI 4: Volumen Semana 3 / 4 (Dinámica según datos cargados reales) -->
-            <div id="cardS34" class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+            <!-- KPI 4: Volumen Semana 3 -->
+            <div id="cardS3" class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition" style="display:none;">
                 <div class="flex items-center justify-between">
-                    <span id="labelS34" class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Semana 3</span>
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Volumen Semana 3</span>
                     <span class="p-2 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -224,8 +224,24 @@
                     </span>
                 </div>
                 <div class="mt-4">
-                    <h3 id="kpiS34" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
-                    <p id="descS34" class="text-xs text-slate-500 mt-1">Volumen S3</p>
+                    <h3 id="kpiS3" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+                    <p class="text-xs text-slate-500 mt-1">Volumen S3</p>
+                </div>
+            </div>
+
+            <!-- KPI 5: Volumen Semana 4 -->
+            <div id="cardS4" class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm flex flex-col justify-between hover:shadow-md transition" style="display:none;">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Volumen Semana 4</span>
+                    <span class="p-2 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <h3 id="kpiS4" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</h3>
+                    <p class="text-xs text-slate-500 mt-1">Volumen S4</p>
                 </div>
             </div>
 
@@ -477,13 +493,13 @@
                         { nombre: "Protocolos CXMenores", vol: 110 }
                     ],
                     "s4": [
-                        { nombre: "Gestión Materiales", vol: 38615 },
-                        { nombre: "Gestión Pacientes", vol: 6746 },
-                        { nombre: "Gestión Servicios", vol: 35598 },
-                        { nombre: "Gestión Admisiones", vol: 10515 },
-                        { nombre: "Gestión Mezclas", vol: 4532 },
-                        { nombre: "Movimientos Adicionales", vol: 1648 },
-                        { nombre: "Protocolos CXMenores", vol: 109 }
+                        { nombre: "Gestión Materiales", vol: 53747 },
+                        { nombre: "Gestión Pacientes", vol: 9808 },
+                        { nombre: "Gestión Servicios", vol: 49992 },
+                        { nombre: "Gestión Admisiones", vol: 15560 },
+                        { nombre: "Gestión Mezclas", vol: 6575 },
+                        { nombre: "Movimientos Adicionales", vol: 2182 },
+                        { nombre: "Protocolos CXMenores", vol: 158 }
                     ]
                 }
             }
@@ -520,18 +536,32 @@
                         "Protocolos CXMenores": [2, 44, 54, 34, 47]
                     },
                     "s4": {
-                        "Gestión Materiales": [19330, 19285],
-                        "Gestión Pacientes": [3354, 3392],
-                        "Gestión Servicios": [19461, 16137],
-                        "Gestión Admisiones": [4704, 5811],
-                        "Gestión Mezclas": [2136, 2396],
-                        "Movimientos Adicionales": [945, 703],
-                        "Protocolos CXMenores": [55, 54]
+                        "Gestión Materiales": [19330, 19285, 15132],
+                        "Gestión Pacientes": [3354, 3392, 3062],
+                        "Gestión Servicios": [19461, 16137, 14394],
+                        "Gestión Admisiones": [4704, 5811, 5045],
+                        "Gestión Mezclas": [2136, 2396, 2043],
+                        "Movimientos Adicionales": [945, 703, 534],
+                        "Protocolos CXMenores": [55, 54, 49]
                     }
                 }
             }
         };
 
+        // FECHAS DEL GRÁFICO "Comportamiento Temporal Detallado"
+        // Modifica aquí los números de día para cada semana. El formato es "Lunes 04", "Martes 05", etc.
+        // Cada semana debe tener exactamente 5 entradas (Lunes a Viernes).
+        const diasSemanaFechas = {
+            "2026": {
+                "Mayo": {
+                    "s1": ["Lunes 04", "Martes 05", "Miércoles 06", "Jueves 07", "Viernes 08"],
+                    "s2": ["Lunes 11", "Martes 12", "Miércoles 13", "Jueves 14", "Viernes 15"],
+                    "s3": ["Lunes 18", "Martes 19", "Miércoles 20", "Jueves 21", "Viernes 22"],
+                    "s4": ["Lunes 25", "Martes 26", "Miércoles 27", "Jueves 28", "Viernes 29"]
+                }
+            }
+        };
+        // Fallback genérico (se usa si no hay fechas definidas arriba para la semana)
         const diasSemanaLabels = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
         // Variables de estado del dashboard
@@ -931,29 +961,26 @@
             const kpiS2 = document.getElementById('kpiS2');
             if (kpiS2) kpiS2.innerText = volS2 > 0 ? volS2.toLocaleString() : "Sin Cargar";
 
-            // 4. Adaptar dinámicamente Tarjeta S3 / S4 (Requerimiento de evitar datos inventados)
-            const cardS34 = document.getElementById('cardS34');
-            const labelS34 = document.getElementById('labelS34');
-            const kpiS34 = document.getElementById('kpiS34');
-            const descS34 = document.getElementById('descS34');
-
-            if (semanasCargadas.includes("s4") && cardS34) {
-                // Si la semana 4 fue cargada, mostramos s4
-                if (labelS34) labelS34.innerText = "Semana 4";
-                const volS4 = mesActualObj["s4"].reduce((acc, cur) => acc + cur.vol, 0);
-                if (kpiS34) kpiS34.innerText = volS4.toLocaleString();
-                if (descS34) descS34.innerText = "Volumen S4";
-                cardS34.style.display = "flex";
-            } else if (semanasCargadas.includes("s3") && cardS34) {
-                // De lo contrario, si hay s3, mostramos s3
-                if (labelS34) labelS34.innerText = "Semana 3";
+            // 4. Tarjeta Semana 3 (visible solo si hay datos de s3)
+            const cardS3 = document.getElementById('cardS3');
+            const kpiS3 = document.getElementById('kpiS3');
+            if (semanasCargadas.includes("s3") && cardS3) {
                 const volS3 = mesActualObj["s3"].reduce((acc, cur) => acc + cur.vol, 0);
-                if (kpiS34) kpiS34.innerText = volS3.toLocaleString();
-                if (descS34) descS34.innerText = "Volumen S3";
-                cardS34.style.display = "flex";
-            } else if (cardS34) {
-                // Si no hay s3 ni s4, se oculta la cuarta tarjeta para no inventar cifras
-                cardS34.style.display = "none";
+                if (kpiS3) kpiS3.innerText = volS3.toLocaleString();
+                cardS3.style.display = "flex";
+            } else if (cardS3) {
+                cardS3.style.display = "none";
+            }
+
+            // 5. Tarjeta Semana 4 (visible solo si hay datos de s4)
+            const cardS4 = document.getElementById('cardS4');
+            const kpiS4 = document.getElementById('kpiS4');
+            if (semanasCargadas.includes("s4") && cardS4) {
+                const volS4 = mesActualObj["s4"].reduce((acc, cur) => acc + cur.vol, 0);
+                if (kpiS4) kpiS4.innerText = volS4.toLocaleString();
+                cardS4.style.display = "flex";
+            } else if (cardS4) {
+                cardS4.style.display = "none";
             }
 
             // 5. Encontrar Servicio Líder (Sumando todas las semanas cargadas)
@@ -1069,8 +1096,11 @@
             semanasDisponibles.forEach(semanaKey => {
                 const datasetSemana = tendenciaAnio[semanaKey]?.[integracionSeleccionada] || [0,0,0,0,0];
 
-                diasSemanaLabels.forEach((dia, index) => {
-                    etiquetas.push(`${dia} ${semanaKey.toUpperCase()}`);
+                // Usa las fechas manuales si están definidas para este año/mes/semana, si no usa el fallback genérico
+                const fechasSemana = diasSemanaFechas?.[anioSeleccionado]?.[mesSeleccionado]?.[semanaKey] || diasSemanaLabels;
+
+                fechasSemana.forEach((etiquetaDia, index) => {
+                    etiquetas.push(etiquetaDia);
                     valores.push(datasetSemana[index] !== undefined ? datasetSemana[index] : 0);
                 });
             });
