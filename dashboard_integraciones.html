@@ -490,16 +490,16 @@
                         { nombre: "Gestión Admisiones", vol: 22969 },
                         { nombre: "Gestión Mezclas", vol: 11295 },
                         { nombre: "Movimientos Adicionales", vol: 3080 },
-                        { nombre: "Protocolos CXMenores", vol: 110 }
+                        { nombre: "Protocolos CXMenores", vol: 181 }
                     ],
                     "s4": [
-                        { nombre: "Gestión Materiales", vol: 53747 },
-                        { nombre: "Gestión Pacientes", vol: 9808 },
-                        { nombre: "Gestión Servicios", vol: 49992 },
-                        { nombre: "Gestión Admisiones", vol: 15560 },
-                        { nombre: "Gestión Mezclas", vol: 6575 },
-                        { nombre: "Movimientos Adicionales", vol: 2182 },
-                        { nombre: "Protocolos CXMenores", vol: 158 }
+                        { nombre: "Gestión Materiales", vol: 93376 },
+                        { nombre: "Gestión Pacientes", vol: 17540 },
+                        { nombre: "Gestión Servicios", vol:  83052},
+                        { nombre: "Gestión Admisiones", vol: 26374 },
+                        { nombre: "Gestión Mezclas", vol: 11415 },
+                        { nombre: "Movimientos Adicionales", vol: 3509 },
+                        { nombre: "Protocolos CXMenores", vol: 283 }
                     ]
                 }
             }
@@ -536,13 +536,13 @@
                         "Protocolos CXMenores": [2, 44, 54, 34, 47]
                     },
                     "s4": {
-                        "Gestión Materiales": [19330, 19285, 15132],
-                        "Gestión Pacientes": [3354, 3392, 3062],
-                        "Gestión Servicios": [19461, 16137, 14394],
-                        "Gestión Admisiones": [4704, 5811, 5045],
-                        "Gestión Mezclas": [2136, 2396, 2043],
-                        "Movimientos Adicionales": [945, 703, 534],
-                        "Protocolos CXMenores": [55, 54, 49]
+                        "Gestión Materiales": [19330, 19285, 15132, 20441, 19188],
+                        "Gestión Pacientes": [3354, 3392, 3062, 3385, 4347],
+                        "Gestión Servicios": [19461, 16137, 14394, 16664, 16396],
+                        "Gestión Admisiones": [4704, 5811, 5045, 5054, 5760],
+                        "Gestión Mezclas": [2136, 2396, 2043, 2487, 2353],
+                        "Movimientos Adicionales": [945, 703, 534, 686, 641],
+                        "Protocolos CXMenores": [55, 54, 49, 71, 55]
                     }
                 }
             }
@@ -785,8 +785,6 @@
             const thS1 = document.getElementById('thSemana1');
             const thS2 = document.getElementById('thSemana2');
             
-            const labelSemana1 = document.getElementById('labelSemana1');
-            const labelSemana2 = document.getElementById('labelSemana2');
             const labelKpiDiff = document.getElementById('labelKpiDiff');
             const kpiDiffPeriodLabel = document.getElementById('kpiDiffPeriodLabel');
             const tituloGraficoPrincipal = document.getElementById('tituloGraficoPrincipal');
@@ -795,8 +793,6 @@
             const subtituloGraficoDesviacion = document.getElementById('subtituloGraficoDesviacion');
 
             if (modoComparacion) {
-                if (labelSemana1) labelSemana1.innerText = `VOLUMEN ${mesCompararSeleccionado.toUpperCase()}`;
-                if (labelSemana2) labelSemana2.innerText = `VOLUMEN ${mesSeleccionado.toUpperCase()}`;
                 if (thS1) thS1.innerText = `${mesCompararSeleccionado} (Vol)`;
                 if (thS2) thS2.innerText = `${mesSeleccionado} (Vol)`;
 
@@ -814,8 +810,6 @@
                 const sbText = sbSel && sbSel.options[sbSel.selectedIndex] ? sbSel.options[sbSel.selectedIndex].text : 'S1';
                 const scText = scSel && scSel.options[scSel.selectedIndex] ? scSel.options[scSel.selectedIndex].text : 'S2';
                 
-                if (labelSemana1) labelSemana1.innerText = `VOLUMEN ${sbText.toUpperCase()}`;
-                if (labelSemana2) labelSemana2.innerText = `VOLUMEN ${scText.toUpperCase()}`;
                 if (thS1) thS1.innerText = `${sbText} (Vol)`;
                 if (thS2) thS2.innerText = `${scText} (Vol)`;
 
@@ -905,10 +899,6 @@
                 const sbText = semanaBaseSel.options[semanaBaseSel.selectedIndex] ? semanaBaseSel.options[semanaBaseSel.selectedIndex].text : 'S1';
                 const scText = semanaComparaSel.options[semanaComparaSel.selectedIndex] ? semanaComparaSel.options[semanaComparaSel.selectedIndex].text : 'S2';
                 
-                const labelSemana1 = document.getElementById('labelSemana1');
-                if (labelSemana1) labelSemana1.innerText = `VOLUMEN ${sbText.toUpperCase()}`;
-                const labelSemana2 = document.getElementById('labelSemana2');
-                if (labelSemana2) labelSemana2.innerText = `VOLUMEN ${scText.toUpperCase()}`;
                 const thS1 = document.getElementById('thSemana1');
                 const thS2 = document.getElementById('thSemana2');
                 if (thS1) thS1.innerText = `${sbText} (Vol)`;
