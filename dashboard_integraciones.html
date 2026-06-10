@@ -309,10 +309,10 @@
         <!-- SECCIÓN: Comportamiento Hora a Hora -->
         <section class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm space-y-5">
             <!-- Encabezado -->
-            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 border-b border-slate-100 dark:border-slate-900 pb-5">
+            <div class="flex flex-col md:flex-col md:items-start md:justify-between gap-3 border-b border-slate-100 dark:border-slate-900 pb-5">
                 <div>
                     <h3 class="font-bold text-slate-900 dark:text-white text-lg">Comportamiento Hora a Hora</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Tráfico por integración en cada día hábil de la semana seleccionada (6am – 10pm)</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">Tráfico por integración en cada día hábil de la semana seleccionada (6am – 10pm)</p>
                 </div>
                 <!-- Convenciones -->
                 <div class="flex flex-wrap gap-x-4 gap-y-2 items-center text-xs text-slate-500 dark:text-slate-400 shrink-0">
@@ -562,6 +562,15 @@
                         { nombre: "Gestión Mezclas", vol: 13070 },
                         { nombre: "Movimientos Adicionales", vol: 4410 },
                         { nombre: "Protocolos CXMenores", vol: 225 }
+                    ],
+                    "s2": [
+                        { nombre: "Gestión Materiales", vol: 35176 },
+                        { nombre: "Gestión Pacientes", vol: 3633 },
+                        { nombre: "Gestión Servicios", vol: 22154 },
+                        { nombre: "Gestión Admisiones", vol: 5795 },
+                        { nombre: "Gestión Mezclas", vol: 4214 },
+                        { nombre: "Movimientos Adicionales", vol: 1092 },
+                        { nombre: "Protocolos CXMenores", vol: 44 }
                     ]
                 }
             }
@@ -616,6 +625,15 @@
                         "Gestión Mezclas": [2611, 2346, 2817, 2618, 2678],
                         "Movimientos Adicionales": [818, 682, 851, 1363, 696],
                         "Protocolos CXMenores": [25, 67, 56, 43, 64]
+                    },
+                    "s2": {
+                        "Gestión Materiales": [13889, 21287],
+                        "Gestión Pacientes": [148, 3485],
+                        "Gestión Servicios": [5312, 16842],
+                        "Gestión Admisiones": [444, 5351],
+                        "Gestión Mezclas": [1569, 2645],
+                        "Movimientos Adicionales": [351, 741],
+                        "Protocolos CXMenores": [16, 28]
                     }
                 }
             }
@@ -895,7 +913,26 @@
                         }
                     },
                     "s2": {
-                        0: null, 1: null, 2: null, 3: null, 4: null
+                        0: { // Lunes 08
+                            "Gestión Materiales":       [1282, 462, 936, 495, 1071, 807, 890, 504, 898, 640, 1081, 1165, 1061, 322, 927, 703, 645],
+                            "Gestión Servicios":        [363, 309, 153, 358, 348, 519, 590, 374, 393, 491, 305, 380, 277, 148, 143, 71, 90],
+                            "Gestión Admisiones":       [5, 5, 5, 11, 13, 49, 62, 52, 72, 48, 41, 13, 26, 9, 17, 8, 8],
+                            "Gestión Mezclas":          [135, 28, 194, 63, 170, 69, 85, 60, 191, 50, 133, 62, 107, 20, 96, 39, 67],
+                            "Gestión Pacientes":        [4, 5, 4, 9, 12, 15, 11, 13, 9, 10, 12, 5, 12, 5, 10, 5, 7],
+                            "Movimientos Adicionales":  [4, 9, 12, 26, 24, 22, 33, 28, 41, 34, 27, 27, 8, 14, 16, 13, 13],
+                            "Protocolos CXMenores":     [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 5, 6, 4, 0, 0, 0, 0]
+                        },
+                        1: { // Martes 09
+                            "Gestión Materiales":       [892, 539, 1324, 1317, 1300, 1625, 1670, 1101, 1491, 1390, 2101, 1632, 1560, 792, 1032, 921, 600],
+                            "Gestión Servicios":        [953, 1037, 1370, 1526, 1603, 1965, 1518, 978, 1182, 1282, 1041, 713, 801, 261, 202, 182, 228],
+                            "Gestión Admisiones":       [160, 440, 598, 541, 597, 642, 295, 307, 728, 393, 365, 136, 63, 25, 24, 19, 18],
+                            "Gestión Mezclas":          [171, 45, 227, 135, 174, 228, 211, 114, 248, 231, 292, 123, 152, 39, 63, 91, 101],
+                            "Gestión Pacientes":        [129, 314, 443, 360, 378, 286, 165, 209, 620, 255, 139, 74, 52, 19, 18, 13, 11],
+                            "Protocolos CXMenores":     [0, 0, 4, 1, 8, 2, 0, 1, 0, 5, 1, 1, 0, 0, 0, 0, 5]
+                        },
+                        2: null,
+                        3: null,
+                        4: null
                     },
                     "s3": {
                         0: null, 1: null, 2: null, 3: null, 4: null
